@@ -1,47 +1,49 @@
 // importScripts('dependencies/gl-matrix.js');
 import { Scene } from "./scene.js";
-import { StraightEdge } from "./geometry/StraightEdge.js";
 import { Edge } from "./geometry/Edge.js";
 import { Circle } from "./geometry/Circle.js";
 import { Ray } from "./ray.js";
 import { Pixel } from "./pixel.js";
 import { MatteMaterial } from "./material/matte.js";
 import { EmitterMaterial } from "./material/emitter.js";
-import { Globals } from "./globals.js";
 import { glMatrix, vec2 } from "./dependencies/gl-matrix-es6.js";
+import { Utils } from "./utils.js";
 
 
 var canvasSize;
 var scene;
 var pixelBuffer = [];
 // var vec2 = glMatrix.vec2;
-var PHOTONS_PER_FRAME;
-var RENDER_TYPE_NOISE;
 var coloredPixels = 0;
 var frameSkipperValue = 0; // 100;
 var frameSkipperCount = 0;
 var sharedArray;
 
-var WORLD_SIZE = Globals.WORLD_SIZE;  
-var LIGHT_BOUNCES = Globals.LIGHT_BOUNCES; 
+var WORLD_SIZE;  
+var LIGHT_BOUNCES; 
+
+var Globals;
 
 onmessage = e => {
 
     if(e.data.type == "start") {
         canvasSize = e.data.canvasSize;
-        PHOTONS_PER_FRAME = e.data.PHOTONS_PER_FRAME;
-        RENDER_TYPE_NOISE = e.data.RENDER_TYPE_NOISE;
 
         sharedArray = new Float32Array(e.data.sharedBuffer);
 
-    
+        // passing globals from main.js since they could change while the app is running
+        Globals = e.data.Globals;
+        WORLD_SIZE = Globals.WORLD_SIZE;  
+        LIGHT_BOUNCES = Globals.LIGHT_BOUNCES; 
+
+
         scene = new Scene();
     
     
         let edgeMaterial = new MatteMaterial();
-        let ledge = new Edge(-10, -10, -10,  10);
-        let redge = new Edge( 10, -10,  10,  10);
-        let tedge = new Edge(-10,  10,  10,  10);
+        let ledge = new Edge(-10, -10, -10,  15);
+        let redge = new Edge( 10, -10,  10,  15);
+        let tedge = new Edge(-10,  15,  10,  15);
         let bedge = new Edge(-10, -10,  10, -10);
     
     
@@ -51,40 +53,71 @@ onmessage = e => {
         scene.add(bedge, edgeMaterial);
     
 
-        let s = 4.65;
-        let r = 1 * s;
-        let g = 1 * s;
-        let b = 1 * s;
+        let s = 4;
+        let r1 = 4 * s;
+        let g1 = 4 * s;
+        let b1 = 4 * s;
+
+        let r2 = 0.1 * s;
+        let g2 = 0.1 * s;
+        let b2 = 0.1 * s;
         // scene.add(new Circle(0, 8, 1), new EmitterMaterial({ color: [r,g,b], opacity: 1.0 }));
         // scene.add(new Circle(0, 8, 0.0001), new EmitterMaterial({ color: [10, 10, 10], opacity: 0.0 }));
         // scene.add(new Circle(0, 8, 0.0001), new EmitterMaterial({ color: [1000, 1000, 1000], opacity: 0.0, sampleWeight: 0.001 }));
 
         // scene.add(new Edge(7, 9.999, -7, 9.999), new EmitterMaterial({ color: [r,g,b], opacity: 0.0 }));
 
-        scene.add(new Edge(-4, 9+1.5, -9, 8+1.5), new EmitterMaterial({ color: [10*s,10*s,10*s], opacity: 0.0 }));
-        scene.add(new Edge(9,  8+1.5, 4,  9+1.5), new EmitterMaterial({ color: [10*s,10*s,10*s], opacity: 0.0 }));
+        // scene.add(new Edge(-4, 9+5.5, -9, 8+5.5), new EmitterMaterial({ color: [10*s, 3*s, 0*s], opacity: 0.0 }));
+        // scene.add(new Edge(9,  8+5.5, 4,  9+5.5), new EmitterMaterial({ color: [0*s, 3*s, 10*s], opacity: 0.0 }));
     
+        let count = 135;
+        let radius = 7.5;
+        for(let i = 0; i < count; i++) {
 
-        for(let i = -1; i < 2; i++) {
+            // let s = 0.1;
+            // let xOff = Utils.rand() * 18 - 9;
+            // let yOff = Utils.rand() * 19 - 11;
 
-            let s = i === 0 ? 1 : 0.5;
-            let xOff = i * 5;
+            // let edge1 = new Edge(-1 * s + xOff, -1 * s + yOff, +1 * s + xOff, +1 * s + yOff);
+            // let edge2 = new Edge(+1 * s + xOff, -1 * s + yOff, -1 * s + xOff, +1 * s + yOff);
+            // scene.add(edge1, new MatteMaterial({ opacity: 1 }));
+            // scene.add(edge2, new MatteMaterial({ opacity: 1 }));    
 
-            let edge1 = new Edge(-3 * s + xOff, -3 * s, +3 * s + xOff, +3 * s);
-            let edge2 = new Edge(+3 * s + xOff, -3 * s, -3 * s + xOff, +3 * s);
-            scene.add(edge1, new MatteMaterial({ opacity: 1 }));
-            scene.add(edge2, new MatteMaterial({ opacity: 1 }));    
+            let s = 0.15;
+            let t = i / count;
+            let angle = t * Math.PI * 2;
+            let nradius = radius + Math.sin(angle * 12) * 1;
+            let xOff = Math.cos(angle) * nradius;
+            let yOff = Math.sin(angle) * nradius;
+            let alpha = 1; // Math.sin((angle + Math.PI) * 8) * 0.3 + 0.7;
+
+            let edge1 = new Edge(-1 * s + xOff, -1 * s + yOff, +1 * s + xOff, +1 * s + yOff);
+            let edge2 = new Edge(+1 * s + xOff, -1 * s + yOff, -1 * s + xOff, +1 * s + yOff);
+            let edge = i % 2 == 0 ? edge1 : edge2;
+            let circle = new Circle(xOff, yOff, 0.2);
+            let circle2 = new Circle(xOff, yOff, 0.0001);
+            
+            let r = r1 * t + r2 * (1-t);
+            let g = g1 * t + g2 * (1-t);
+            let b = b1 * t + b2 * (1-t);
+
+            // if(i % 15 == 0) {
+                // scene.add(circle, new EmitterMaterial({ color: [r, g, b] }));
+                // scene.add(circle2, new EmitterMaterial({ color: [r * 17, g * 17, b * 17], sampleWeight: 0.01 }));
+            // }
+            // else
+                scene.add(edge, new MatteMaterial({ opacity: alpha }));    
         }
     
-        scene.add(new Circle(0, 0, 2), new MatteMaterial({ opacity: 0.65 }));
-        scene.add(new Circle(0, 0, 6), new MatteMaterial({ opacity: 0.45 }));
+        scene.add(new Circle(0, 0, 1.5), new EmitterMaterial({ opacity: 0, color: [r1, g1, b1] }));
+        scene.add(new Circle(0, 0, 4),   new MatteMaterial({ opacity: 0.75 }));
 
 
         requestAnimationFrame(renderSample);
     }
 
-    if(e.data.type == "PHOTONS-PER-FRAME-UPDATE") {
-        PHOTONS_PER_FRAME = e.data.PHOTONS_PER_FRAME;
+    if(e.data.type == "Globals-update") {
+        Globals = e.data.Globals;
     }
 };
 
@@ -105,7 +138,7 @@ function renderSample() {
     // // also make sure to reset this
     coloredPixels = 0;
 
-    let photonCount = PHOTONS_PER_FRAME;
+    let photonCount = Globals.PHOTONS_PER_FRAME;
     let photonMult  = photonCount / 10;
 
     for(let i = 0; i < photonCount; i++) {
@@ -113,7 +146,7 @@ function renderSample() {
     }
 
     postMessage({
-        photonsFired: PHOTONS_PER_FRAME,
+        photonsFired: Globals.PHOTONS_PER_FRAME,
         coloredPixels: coloredPixels,
     });
 }
@@ -129,7 +162,7 @@ function colorPhoton(ray, t, WORLD_SIZE, emitterColor, contribution, worldAttenu
     let previousPixel = [-1, -1];
 
 
-    if(!RENDER_TYPE_NOISE) {
+    if(!Globals.RENDER_TYPE_NOISE) {
         for(let i = 0; i < steps; i++) {
             let t = step * (i + Math.random() * 1);
             vec2.scaleAndAdd(worldPoint, ray.o, ray.d, t);
@@ -173,7 +206,7 @@ function colorPhoton(ray, t, WORLD_SIZE, emitterColor, contribution, worldAttenu
 
 
 
-    if(RENDER_TYPE_NOISE) {
+    if(Globals.RENDER_TYPE_NOISE) {
         // IMPORTANT:  WE NEED TO TAKE LESS SAMPLES IF THE RAY IS SHORT (proportionally)!! OTHERWISE we would increase radiance along short rays in an unproportional way
         // because we would add more emitterColor along those smaller rays 
         let SAMPLES = Math.floor(steps * 0.15);

@@ -1,5 +1,6 @@
 import { Geometry } from "./Geometry.js"
 import { glMatrix, vec2 } from "./../dependencies/gl-matrix-es6.js";
+import { AABB } from "./AABB.js";
 
 class Circle extends Geometry {
     constructor(x, y, radius) {
@@ -7,6 +8,10 @@ class Circle extends Geometry {
 
         this.center = vec2.fromValues(x, y);
         this.radius = radius;
+
+        this.aabb = new AABB();
+        this.aabb.addVertex(vec2.fromValues(x - radius, y - radius));
+        this.aabb.addVertex(vec2.fromValues(x + radius, y + radius));
     }
 
     intersect(ray) {

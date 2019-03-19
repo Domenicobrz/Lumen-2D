@@ -1,13 +1,10 @@
+import { Globals } from "./globals.js";
 import { Scene } from "./scene.js";
-import { StraightEdge } from "./geometry/StraightEdge.js";
-import { Circle } from "./geometry/Circle.js";
-import { Edge } from "./geometry/Edge.js";
-import { Ray } from "./ray.js";
-import { Pixel } from "./pixel.js";
 import { MatteMaterial } from "./material/matte.js";
-import { EmitterMaterial } from "./material/emitter.js";
+import { Edge } from "./geometry/Edge.js";
+import { BVH } from "./bvh.js";
+import { Ray } from "./ray.js";
 import { glMatrix, vec2 } from "./dependencies/gl-matrix-es6.js";
-
 
 window.addEventListener("load", init);
 
@@ -22,8 +19,6 @@ var photonsFired  = 0;
 var coloredPixels = 0;
 var scene;
 
-var RENDER_TYPE_NOISE = true;
-var PHOTONS_PER_FRAME = 15000;
 var frameSkipperValue = 0; // 100;
 var frameSkipperCount = 0;
 
@@ -34,12 +29,18 @@ var workers = [];
 
 
 function init() {
-
     canvas = document.getElementById('canvas');
 	canvas.width  = canvasSize;
 	canvas.height = canvasSize;
 	context = canvas.getContext('2d');
     imageDataObject = context.createImageData(canvasSize, canvasSize);
+
+
+    // BVH debug test 
+    // debugBvh();
+    // console.log("returning early from function");
+    // return;
+    // BVH debug test - END 
 
 
     var length = canvasSize * canvasSize * 3;
@@ -55,9 +56,8 @@ function init() {
         type: "start",
         scene: { },
         canvasSize: canvasSize,
-        PHOTONS_PER_FRAME: PHOTONS_PER_FRAME,
-        RENDER_TYPE_NOISE: RENDER_TYPE_NOISE,
         sharedBuffer: sharedBuffer,
+        Globals: Globals,
     };
 
     let onWorkerMessage = e => {
@@ -94,7 +94,7 @@ function init() {
     let workersCount = 5;
 
     for(let i = 0; i < workersCount; i++) {
-        workers.push(new Worker("./shared-array-update/worker.js", { type: "module" }));
+        workers.push(new Worker("./libs/worker.js", { type: "module" }));
         workers[i].postMessage(startWorkerObject);
         workers[i].onmessage = onWorkerMessage;
     }
@@ -102,12 +102,12 @@ function init() {
 
     window.addEventListener("keypress", function(e) {
         if(e.key == "k") {
-            PHOTONS_PER_FRAME *= 2;
+            Globals.PHOTONS_PER_FRAME *= 2;
 
             for(let i = 0; i < workersCount; i++) {
                 workers[i].postMessage({
-                    type: "PHOTONS-PER-FRAME-UPDATE",
-                    PHOTONS_PER_FRAME: PHOTONS_PER_FRAME,
+                    type: "Globals-update",
+                    Globals: Globals,
                 });
             }
         }
@@ -170,4 +170,33 @@ function renderSample() {
     }
 
     context.putImageData(imageDataObject, 0, 0);
+}
+
+
+
+function debugBvh() {
+    
+    scene = new Scene();    
+    
+    let edgesCount = 500;
+    for(let i = 0; i < edgesCount; i++) {
+        let x  = ( Math.random() * 2 - 1 ) * 0.35;
+        let y  = ( Math.random() * 2 - 1 ) * 0.35;
+        let ex = ( Math.random() * 2 - 1 ) * 0.35;
+        let ey = ( Math.random() * 2 - 1 ) * 0.35;
+
+        let ox = Math.random() * 17.9 - 8.9;
+        let oy = Math.random() * 17.9 - 8.9;
+
+        // let edge = new Edge(x, y, x, y + 1);
+        let edge = new Edge(x + ox, y + oy, ex + ox, ey + oy);
+        scene.add(edge);
+    }
+
+    let ray  = new Ray(vec2.fromValues(6, 0), vec2.fromValues(-0.7, 0.7));
+
+    scene.add(new Edge(-9, -9, -9, 9));
+
+    let bvh = new BVH(scene._objects);
+    bvh.debug(context, canvasSize, canvasSize, Globals.WORLD_SIZE / 2, Globals.WORLD_SIZE / 2, ray);
 }

@@ -10,6 +10,9 @@
 
 # misc
 /renders
+/misc
+/inspiration
+/old files
 
 .DS_Store
 .env.local

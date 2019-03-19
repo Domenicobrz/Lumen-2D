@@ -1,5 +1,6 @@
 import { Geometry } from "./Geometry.js"
-import { glMatrix, vec2 } from "../dependencies/gl-matrix-es6.js";
+import { glMatrix, vec2 } from "./../dependencies/gl-matrix-es6.js";
+import { AABB } from "./AABB.js";
 
 class Edge extends Geometry {
     constructor(x, y, dx, dy, nx, ny) {
@@ -7,6 +8,11 @@ class Edge extends Geometry {
 
         this.v0 = vec2.fromValues(x, y);
         this.v1 = vec2.fromValues(dx, dy);
+        this.aabb = new AABB();
+        this.aabb.addVertex(this.v0);
+        this.aabb.addVertex(this.v1);
+        this.center = vec2.fromValues((this.v0[0] + this.v1[0]) / 2, 
+                                      (this.v0[1] + this.v1[1]) / 2);
 
         if(nx !== undefined && ny !== undefined) {
             this.normal = vec2.fromValues(nx, ny);
@@ -46,7 +52,6 @@ class Edge extends Geometry {
 
         return false; // No collision
     }
-
 
     getRandomPoint() {
         let t = Math.random();

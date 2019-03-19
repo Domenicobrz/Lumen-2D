@@ -1,10 +1,12 @@
 import { EmitterMaterial } from "./material/emitter.js";
 import { MatteMaterial } from "./material/matte.js";
 import { glMatrix, vec2 } from "./dependencies/gl-matrix-es6.js";
+import { BVH } from "./bvh.js";
 
 class Scene {
     constructor() {
         this._objects  = [];
+        this._bvh;
 
         // using a cumulative distribution function to sample emitters
         this._emittersCdfArray = [];
@@ -62,24 +64,32 @@ class Scene {
 
     intersect(ray) {
 
-        let minT = 999999999999999999;
-        let intersectionResult = { };
-
-        for(let i = 0; i < this._objects.length; i++) {
-            let object = this._objects[i];
-            let result = object.intersect(ray);
-
-            if(result) {
-                if(result.t < minT) {
-                    minT = result.t;
-                    intersectionResult.object = object;
-                    intersectionResult.t = minT;
-                    intersectionResult.normal = vec2.clone(result.normal);
-                }
-            }
+        if(!this._bvh) {
+            this._bvh = new BVH(this._objects);
         }
 
-        return intersectionResult;
+        let result = this._bvh.intersect(ray);
+
+        return result;
+
+        // let minT = 999999999999999999;
+        // let intersectionResult = { };
+
+        // for(let i = 0; i < this._objects.length; i++) {
+        //     let object = this._objects[i];
+        //     let result = object.intersect(ray);
+
+        //     if(result) {
+        //         if(result.t < minT) {
+        //             minT = result.t;
+        //             intersectionResult.object = object;
+        //             intersectionResult.t = minT;
+        //             intersectionResult.normal = vec2.clone(result.normal);
+        //         }
+        //     }
+        // }
+
+        // return intersectionResult;
     }
 }
 

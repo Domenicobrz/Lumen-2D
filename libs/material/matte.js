@@ -8,7 +8,8 @@ class MatteMaterial extends Material {
 
         if(!options) options = { };
 
-        this.opacity = options.opacity || 1;
+                       // remember: 0 is a valid opacity option, so we need to check for undefined instead of just going   options.opacity || 1
+        this.opacity = options.opacity !== undefined ? options.opacity : 1;
     }
 
     computeScattering(ray, input_normal, t, contribution, worldAttenuation) {
