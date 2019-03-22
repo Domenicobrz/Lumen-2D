@@ -4,19 +4,20 @@ import { glMatrix, vec2 } from "./dependencies/gl-matrix-es6.js";
 import { BVH } from "./bvh.js";
 
 class Scene {
-    constructor() {
+    constructor(args) {
         this._objects  = [];
         this._bvh;
 
         // using a cumulative distribution function to sample emitters
         this._emittersCdfArray = [];
         this._emittersCdfMax   = 0;
+        this.args = args;
     }
 
     add(object, material) {
         object.material = material || new MatteMaterial();
         this._objects.push(object);
-        
+
         if(object.material instanceof EmitterMaterial) {
             let prevCdfValue = 0;
             if(this._emittersCdfArray.length !== 0) 
@@ -65,7 +66,9 @@ class Scene {
     intersect(ray) {
 
         if(!this._bvh) {
-            this._bvh = new BVH(this._objects);
+            this._bvh = new BVH(this._objects, {
+                showDebug: this.args.showBVHdebug
+            });
         }
 
         let result = this._bvh.intersect(ray);

@@ -6,6 +6,7 @@ import { Ray } from "./ray.js";
 import { Pixel } from "./pixel.js";
 import { MatteMaterial } from "./material/matte.js";
 import { EmitterMaterial } from "./material/emitter.js";
+import { BeamEmitterMaterial } from "./material/beamEmitter.js";
 import { glMatrix, vec2 } from "./dependencies/gl-matrix-es6.js";
 import { Utils } from "./utils.js";
 
@@ -37,7 +38,11 @@ onmessage = e => {
         LIGHT_BOUNCES = Globals.LIGHT_BOUNCES; 
 
 
-        scene = new Scene();
+        let workerIndex = e.data.workerIndex;
+
+        scene = new Scene({
+            showBVHdebug: workerIndex === 0 ? true : false,
+        });
     
     
         let edgeMaterial = new MatteMaterial();
@@ -53,64 +58,38 @@ onmessage = e => {
         scene.add(bedge, edgeMaterial);
     
 
-        let s = 4;
-        let r1 = 4 * s;
-        let g1 = 4 * s;
-        let b1 = 4 * s;
-
-        let r2 = 0.1 * s;
-        let g2 = 0.1 * s;
-        let b2 = 0.1 * s;
-        // scene.add(new Circle(0, 8, 1), new EmitterMaterial({ color: [r,g,b], opacity: 1.0 }));
-        // scene.add(new Circle(0, 8, 0.0001), new EmitterMaterial({ color: [10, 10, 10], opacity: 0.0 }));
-        // scene.add(new Circle(0, 8, 0.0001), new EmitterMaterial({ color: [1000, 1000, 1000], opacity: 0.0, sampleWeight: 0.001 }));
-
-        // scene.add(new Edge(7, 9.999, -7, 9.999), new EmitterMaterial({ color: [r,g,b], opacity: 0.0 }));
-
-        // scene.add(new Edge(-4, 9+5.5, -9, 8+5.5), new EmitterMaterial({ color: [10*s, 3*s, 0*s], opacity: 0.0 }));
-        // scene.add(new Edge(9,  8+5.5, 4,  9+5.5), new EmitterMaterial({ color: [0*s, 3*s, 10*s], opacity: 0.0 }));
-    
-        let count = 135;
+        let count = 10;
         let radius = 7.5;
+        for (let j = 0; j < 5; j++)
         for(let i = 0; i < count; i++) {
 
-            // let s = 0.1;
-            // let xOff = Utils.rand() * 18 - 9;
-            // let yOff = Utils.rand() * 19 - 11;
-
-            // let edge1 = new Edge(-1 * s + xOff, -1 * s + yOff, +1 * s + xOff, +1 * s + yOff);
-            // let edge2 = new Edge(+1 * s + xOff, -1 * s + yOff, -1 * s + xOff, +1 * s + yOff);
-            // scene.add(edge1, new MatteMaterial({ opacity: 1 }));
-            // scene.add(edge2, new MatteMaterial({ opacity: 1 }));    
-
-            let s = 0.15;
+            let s = 0.2 + 0.7 * (j / 5);
             let t = i / count;
             let angle = t * Math.PI * 2;
             let nradius = radius + Math.sin(angle * 12) * 1;
-            let xOff = Math.cos(angle) * nradius;
-            let yOff = Math.sin(angle) * nradius;
-            let alpha = 1; // Math.sin((angle + Math.PI) * 8) * 0.3 + 0.7;
+            let xOff = i * 2 - 9; //Math.cos(angle) * nradius;
+            let yOff = 3 -j * 2; //Math.sin(angle) * nradius;
+            let alpha = i / count; //1; // Math.sin((angle + Math.PI) * 8) * 0.3 + 0.7;
+            if(j % 2 == 1) alpha = 1 - alpha;
 
             let edge1 = new Edge(-1 * s + xOff, -1 * s + yOff, +1 * s + xOff, +1 * s + yOff);
             let edge2 = new Edge(+1 * s + xOff, -1 * s + yOff, -1 * s + xOff, +1 * s + yOff);
-            let edge = i % 2 == 0 ? edge1 : edge2;
-            let circle = new Circle(xOff, yOff, 0.2);
-            let circle2 = new Circle(xOff, yOff, 0.0001);
             
-            let r = r1 * t + r2 * (1-t);
-            let g = g1 * t + g2 * (1-t);
-            let b = b1 * t + b2 * (1-t);
+            let r = 30; //r1 * t + r2 * (1-t);
+            let g = 30; //g1 * t + g2 * (1-t);
+            let b = 30; //b1 * t + b2 * (1-t);
 
-            // if(i % 15 == 0) {
-                // scene.add(circle, new EmitterMaterial({ color: [r, g, b] }));
-                // scene.add(circle2, new EmitterMaterial({ color: [r * 17, g * 17, b * 17], sampleWeight: 0.01 }));
-            // }
-            // else
-                scene.add(edge, new MatteMaterial({ opacity: alpha }));    
+          
+            scene.add(edge1, new MatteMaterial({ opacity: alpha }));    
+            scene.add(edge2, new MatteMaterial({ opacity: alpha }));    
         }
     
-        scene.add(new Circle(0, 0, 1.5), new EmitterMaterial({ opacity: 0, color: [r1, g1, b1] }));
-        scene.add(new Circle(0, 0, 4),   new MatteMaterial({ opacity: 0.75 }));
+        let xs = 6;
+        scene.add(new Circle(-xs, 9, 0.01), new BeamEmitterMaterial({ opacity: 0, color: [30, 6, 3], beamDirection: [0, -1] }));
+        scene.add(new Circle(xs, 9, 0.01), new BeamEmitterMaterial({ opacity: 0, color: [3, 6, 30], beamDirection: [0, -1] }));
+        scene.add(new Circle(0, 9, 0.9), new EmitterMaterial({ opacity: 0, color: [30, 30, 30] }));
+        scene.add(new Circle(0, 9, 1),   new MatteMaterial({ opacity: 0.3 }));
+        // scene.add(new Circle(0, 0, 4),   new MatteMaterial({ opacity: 0.75 }));
 
 
         requestAnimationFrame(renderSample);
@@ -155,7 +134,20 @@ function renderSample() {
 function colorPhoton(ray, t, WORLD_SIZE, emitterColor, contribution, worldAttenuation) {
     let worldPixelSize = WORLD_SIZE / canvasSize;
     let step = worldPixelSize;
-    let steps = Math.floor(t / worldPixelSize);
+    let steps = Math.floor(t / step);
+    // only used if "steps" ends up being 0
+    let stepAttenuation = 1;
+
+    // the "steps" variable is deprecated and only used in the line-sampling-method
+    // RENDER_TYPE_NOISE now uses continuousSteps which is defined in its code block
+    if(steps === 0) {
+        steps++;
+        stepAttenuation = t / step;
+    }
+
+    if(t < 0.01) {
+        let debug = 0;
+    }
 
     let worldPoint = vec2.create();
     let tmp        = vec2.create();
@@ -163,6 +155,7 @@ function colorPhoton(ray, t, WORLD_SIZE, emitterColor, contribution, worldAttenu
 
 
     if(!Globals.RENDER_TYPE_NOISE) {
+
         for(let i = 0; i < steps; i++) {
             let t = step * (i + Math.random() * 1);
             vec2.scaleAndAdd(worldPoint, ray.o, ray.d, t);
@@ -194,9 +187,9 @@ function colorPhoton(ray, t, WORLD_SIZE, emitterColor, contribution, worldAttenu
                 let prevR = sharedArray[index + 0];
                 let prevG = sharedArray[index + 1];
                 let prevB = sharedArray[index + 2];
-                sharedArray[index + 0] = prevR + emitterColor[0] * contribution * attenuation;
-                sharedArray[index + 1] = prevG + emitterColor[1] * contribution * attenuation;
-                sharedArray[index + 2] = prevB + emitterColor[2] * contribution * attenuation;
+                sharedArray[index + 0] = prevR + emitterColor[0] * contribution * attenuation * stepAttenuation;
+                sharedArray[index + 1] = prevG + emitterColor[1] * contribution * attenuation * stepAttenuation;
+                sharedArray[index + 2] = prevB + emitterColor[2] * contribution * attenuation * stepAttenuation;
             }
         }
 
@@ -207,10 +200,21 @@ function colorPhoton(ray, t, WORLD_SIZE, emitterColor, contribution, worldAttenu
 
 
     if(Globals.RENDER_TYPE_NOISE) {
+        // we can't use "steps" as a base value for a random sampling strategy, because we're sampling in a "continuous" domain!!
+        // here's why: assume t / step is 0.1 (which means that "steps" is 0) - what should we do? compute a single sample? no sample at all? 
+        // another example: assumet t / step is 10.5 (which means that the steps variable holds 10) --- if we choose to compute only 2 samples and then 
+        // compute SAMPLES_STRENGHT as steps / SAMPLES (which would mean 10 / 2 in this example) the rounding error
+        // given by 0.5 will be important!! 
+        // another example: if t / step ends up being 2.5, steps will hold 2, and assume we choose to compute only 1 sample, (since remember that RENDER_TYPE_NOISE 
+        // only chooses to compute a subset of the total amount of pixels touched by a light ray) then SAMPLES_STRENGHT would hold (steps / SAMPLES) == 2, 
+        // but the "real" sample_strenght should be 2.5  
+        let continuousSteps = t / step;
+
         // IMPORTANT:  WE NEED TO TAKE LESS SAMPLES IF THE RAY IS SHORT (proportionally)!! OTHERWISE we would increase radiance along short rays in an unproportional way
         // because we would add more emitterColor along those smaller rays 
-        let SAMPLES = Math.floor(steps * 0.15);
-        let SAMPLES_STRENGHT = steps / SAMPLES;
+        let SAMPLES = Math.max(  Math.floor(continuousSteps * 0.15),  1  );
+        let SAMPLES_STRENGHT = continuousSteps / SAMPLES; // think of it this way: if we should have sampled 30 pixels (with the line sampling method), but instead we're just 
+                                                          // coloring two, then these two pixels need 15x times the amount of radiance
     
         for(let i = 0; i < SAMPLES; i++) {
             let tt = t * Math.random();
@@ -243,9 +247,9 @@ function colorPhoton(ray, t, WORLD_SIZE, emitterColor, contribution, worldAttenu
                 let prevR = sharedArray[index + 0];
                 let prevG = sharedArray[index + 1];
                 let prevB = sharedArray[index + 2];
-                sharedArray[index + 0] = prevR + emitterColor[0] * SAMPLES_STRENGHT * contribution * attenuation;
-                sharedArray[index + 1] = prevG + emitterColor[1] * SAMPLES_STRENGHT * contribution * attenuation;
-                sharedArray[index + 2] = prevB + emitterColor[2] * SAMPLES_STRENGHT * contribution * attenuation;
+                sharedArray[index + 0] = prevR + emitterColor[0] * SAMPLES_STRENGHT * contribution * attenuation * stepAttenuation;
+                sharedArray[index + 1] = prevG + emitterColor[1] * SAMPLES_STRENGHT * contribution * attenuation * stepAttenuation;
+                sharedArray[index + 2] = prevB + emitterColor[2] * SAMPLES_STRENGHT * contribution * attenuation * stepAttenuation;
             }
         }
 
@@ -261,7 +265,9 @@ function emitPhotons() {
     let ray = photon.ray;
     let color = photon.color;
 
-
+    if(ray.o[0] < -0.048 && ray.o[1] < 9) {
+        let debug = 0;
+    }
 
     let contribution = 1.0;
     let worldAttenuation = (1.0 / WORLD_SIZE)    * 0.2;
@@ -272,7 +278,7 @@ function emitPhotons() {
         
         // if we had an intersection
         if(result.t) {
-            colorPhoton(ray, (result.t - Globals.epsilon), WORLD_SIZE, color, contribution, worldAttenuation);
+            colorPhoton(ray, result.t /*(result.t - Globals.epsilon)*/, WORLD_SIZE, color, contribution, worldAttenuation);
 
 
             // ***** just used for animation 

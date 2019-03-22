@@ -42,6 +42,10 @@ function init() {
     // return;
     // BVH debug test - END 
 
+    if(!Globals.RENDER_TYPE_NOISE) {
+        console.warn("The line sampling method integrator is completely off and doesn't work in the continuous domain, RENDER_TYPE_NOISE = true is HIGHLY suggested for quality results");
+    }
+
 
     var length = canvasSize * canvasSize * 3;
     var size = Float32Array.BYTES_PER_ELEMENT * length;
@@ -57,6 +61,7 @@ function init() {
         scene: { },
         canvasSize: canvasSize,
         sharedBuffer: sharedBuffer,
+        workerIndex: 0,
         Globals: Globals,
     };
 
@@ -91,10 +96,11 @@ function init() {
 
 
 
-    let workersCount = 5;
+    let workersCount = Globals.workersCount;
 
     for(let i = 0; i < workersCount; i++) {
         workers.push(new Worker("./libs/worker.js", { type: "module" }));
+        startWorkerObject.workerIndex = i;
         workers[i].postMessage(startWorkerObject);
         workers[i].onmessage = onWorkerMessage;
     }

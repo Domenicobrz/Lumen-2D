@@ -131,12 +131,14 @@ class BVH {
         }
 
 
-        console.log("--- BVH stats ---");
-        console.log("max depth: "        + stats.maxLevel);
-        console.log("splits on x axis: " + stats.splitOnX);
-        console.log("splits on y axis: " + stats.splitOnY);
-        console.log("degenerate nodes: " + stats.degenerateNodes);
-        console.log("--- END ---");
+        if(args.showDebug) {
+            console.log("--- BVH stats ---");
+            console.log("max depth: "        + stats.maxLevel);
+            console.log("splits on x axis: " + stats.splitOnX);
+            console.log("splits on y axis: " + stats.splitOnY);
+            console.log("degenerate nodes: " + stats.degenerateNodes);
+            console.log("--- END ---");
+        }
     }
 
     intersect(ray) {
@@ -413,7 +415,7 @@ naiveBVHHitRecord naiveBVH::traverseStack(naiveBVHNode* rootnode, Ray ray) {
 
 
         let res  = this.intersect(ray);
-        console.log("average intersection calls: " + this.stats.averageIntersectionCalls);
+        // console.log("average intersection calls: " + this.stats.averageIntersectionCalls);
         
         let t    = 0;
         if(res !== false && res !== undefined) t = res.t; 
