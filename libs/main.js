@@ -12,7 +12,7 @@ var canvas;
 var context;
 var imageDataObject;
 
-var canvasSize = 800;
+var canvasSize = Globals.canvasSize;
 var sharedBuffer;
 var sharedArray;
 var photonsFired  = 0;

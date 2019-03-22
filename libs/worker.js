@@ -58,37 +58,42 @@ onmessage = e => {
         scene.add(bedge, edgeMaterial);
     
 
-        let count = 10;
+        let count = 40;
         let radius = 7.5;
         for (let j = 0; j < 5; j++)
         for(let i = 0; i < count; i++) {
 
-            let s = 0.2 + 0.7 * (j / 5);
-            let t = i / count;
-            let angle = t * Math.PI * 2;
-            let nradius = radius + Math.sin(angle * 12) * 1;
-            let xOff = i * 2 - 9; //Math.cos(angle) * nradius;
-            let yOff = 3 -j * 2; //Math.sin(angle) * nradius;
-            let alpha = i / count; //1; // Math.sin((angle + Math.PI) * 8) * 0.3 + 0.7;
-            if(j % 2 == 1) alpha = 1 - alpha;
+            // let s = 0.2 + 0.7 * (j / 5);
+            // let t = i / count;
+            // let angle = t * Math.PI * 2;
+            // let nradius = radius + Math.sin(angle * 12) * 1;
+            // let xOff = i * 2 - 9; //Math.cos(angle) * nradius;
+            // let yOff = 3 -j * 2; //Math.sin(angle) * nradius;
+            // let alpha = i / count; //1; // Math.sin((angle + Math.PI) * 8) * 0.3 + 0.7;
+            // if(j % 2 == 1) alpha = 1 - alpha;
 
-            let edge1 = new Edge(-1 * s + xOff, -1 * s + yOff, +1 * s + xOff, +1 * s + yOff);
-            let edge2 = new Edge(+1 * s + xOff, -1 * s + yOff, -1 * s + xOff, +1 * s + yOff);
+            // let edge1 = new Edge(-1 * s + xOff, -1 * s + yOff, +1 * s + xOff, +1 * s + yOff);
+            // let edge2 = new Edge(+1 * s + xOff, -1 * s + yOff, -1 * s + xOff, +1 * s + yOff);
             
-            let r = 30; //r1 * t + r2 * (1-t);
-            let g = 30; //g1 * t + g2 * (1-t);
-            let b = 30; //b1 * t + b2 * (1-t);
+            // let r = 30; //r1 * t + r2 * (1-t);
+            // let g = 30; //g1 * t + g2 * (1-t);
+            // let b = 30; //b1 * t + b2 * (1-t);
 
           
-            scene.add(edge1, new MatteMaterial({ opacity: alpha }));    
-            scene.add(edge2, new MatteMaterial({ opacity: alpha }));    
+            // scene.add(edge1, new MatteMaterial({ opacity: alpha }));    
+            // scene.add(edge2, new MatteMaterial({ opacity: alpha }));    
+
+            scene.add(new Circle(Utils.rand() * 19 - 9, Utils.rand() * 15 - 9, Utils.rand() * 0.8),   new MatteMaterial({ opacity: Utils.rand() * 0.5 }));
         }
     
         let xs = 6;
-        scene.add(new Circle(-xs, 9, 0.01), new BeamEmitterMaterial({ opacity: 0, color: [30, 6, 3], beamDirection: [0, -1] }));
-        scene.add(new Circle(xs, 9, 0.01), new BeamEmitterMaterial({ opacity: 0, color: [3, 6, 30], beamDirection: [0, -1] }));
-        scene.add(new Circle(0, 9, 0.9), new EmitterMaterial({ opacity: 0, color: [30, 30, 30] }));
-        scene.add(new Circle(0, 9, 1),   new MatteMaterial({ opacity: 0.3 }));
+        let cs = 2.5;
+        // scene.add(new Circle(-xs, 9, 0.01), new BeamEmitterMaterial({ opacity: 0, color: [30, 6, 3], beamDirection: [0, -1] }));
+        // scene.add(new Circle(xs, 9, 0.01), new BeamEmitterMaterial({ opacity: 0, color: [3, 6, 30], beamDirection: [0, -1] }));
+        scene.add(new Edge(-3, 9, 1, 9), new BeamEmitterMaterial({ opacity: 0, color: [3 * cs, 6 * cs, 30 * cs], beamDirection: [0, -1] }));
+        scene.add(new Edge(-1, 9, 3, 9), new BeamEmitterMaterial({ opacity: 0, color: [30 * cs, 6 * cs, 3 * cs], beamDirection: [0, -1] }));
+        // scene.add(new Circle(0, 9, 0.01), new EmitterMaterial({ opacity: 0, color: [30, 30, 30] }));
+        // scene.add(new Circle(0, 9, 1),   new MatteMaterial({ opacity: 0.3 }));
         // scene.add(new Circle(0, 0, 4),   new MatteMaterial({ opacity: 0.75 }));
 
 
@@ -270,7 +275,7 @@ function emitPhotons() {
     }
 
     let contribution = 1.0;
-    let worldAttenuation = (1.0 / WORLD_SIZE)    * 0.2;
+    let worldAttenuation = Globals.worldAttenuation * (1.0 / Globals.WORLD_SIZE);
 
 
     for(let i = 0; i < LIGHT_BOUNCES; i++) {
