@@ -48,7 +48,7 @@ class Circle extends Geometry {
 
 
         let normal = vec2.create();
-        vec2.sub(normal, S1, ray.o);
+        vec2.sub(normal, S1, this.center);
         vec2.normalize(normal, normal);
 
 

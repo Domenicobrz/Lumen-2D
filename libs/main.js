@@ -4,7 +4,7 @@ import { MatteMaterial } from "./material/matte.js";
 import { Edge } from "./geometry/Edge.js";
 import { BVH } from "./bvh.js";
 import { Ray } from "./ray.js";
-import { glMatrix, vec2 } from "./dependencies/gl-matrix-es6.js";
+import { glMatrix, vec2, mat2 } from "./dependencies/gl-matrix-es6.js";
 
 window.addEventListener("load", init);
 
