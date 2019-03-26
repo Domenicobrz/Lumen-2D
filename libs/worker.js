@@ -22,7 +22,10 @@ var frameSkipperValue = 0; // 100;
 var frameSkipperCount = 0;
 var sharedArray;
 
-var WORLD_SIZE;  
+var WORLD_SIZE = {
+    w: 0,
+    h: 0,
+};  
 var LIGHT_BOUNCES; 
 
 var Globals;
@@ -36,7 +39,8 @@ onmessage = e => {
 
         // passing globals from main.js since they could change while the app is running
         Globals = e.data.Globals;
-        WORLD_SIZE = Globals.WORLD_SIZE;  
+        WORLD_SIZE.h = Globals.WORLD_SIZE;  
+        WORLD_SIZE.w = Globals.WORLD_SIZE * (canvasSize.width / canvasSize.height);  
         LIGHT_BOUNCES = Globals.LIGHT_BOUNCES; 
 
 
@@ -48,10 +52,12 @@ onmessage = e => {
     
     
         let edgeMaterial = new LambertMaterial({ opacity: 1 });
-        let ledge = new Edge(-10, -10, -10,  14);
-        let redge = new Edge( 10, -10,  10,  14);
-        let tedge = new Edge(-10,  14,  10,  14);
-        let bedge = new Edge(-10, -10,  10, -10);
+        let lbound = 19.5;
+        let rbound = 19.5;
+        let ledge = new Edge(-lbound, -10, -lbound,  14);
+        let redge = new Edge( rbound, -10,  rbound,  14);
+        let tedge = new Edge(-lbound,  14,  rbound,  14);
+        let bedge = new Edge(-lbound, -10,  rbound, -10);
     
     
         scene.add(ledge, edgeMaterial);
@@ -60,26 +66,27 @@ onmessage = e => {
         scene.add(bedge, edgeMaterial);
     
 
-        let count = 100;
+        let count = 500;
         let radius = 7.5;
         for(let i = 0; i < count; i++) {
             // scene.add(new Circle(Utils.rand() * 19 - 9, Utils.rand() * 15 - 9, Utils.rand() * 0.8),   new MatteMaterial({ opacity: Utils.rand() * 0.5 }));
-            let xOff = Utils.rand() * 19 - 9.5;
+            let xOff = Utils.rand() * 39 - 19;
             let yOff = Utils.rand() * 16 - 9.5;
-            let yyOff = yOff + (Utils.rand() * 1 - 0.5) * Math.abs(yOff - 10) * 0.08;
-            let xxOff = xOff + (Utils.rand() * 1 - 0.5) * Math.abs(yOff - 10) * 0.08;
+            let yyOff = yOff + (Utils.rand() * 1 - 0.5) * Math.abs(yOff - 10) * 0.15;
+            let xxOff = xOff + (Utils.rand() * 1 - 0.5) * Math.abs(yOff - 10) * 0.15;
 
             // let xxOff = 0.2;
             // xxOff = Utils.rand();
 
-            // if(i % 3 === 0)
+            // if(i % 10 === 0)
             //     scene.add(new Edge(xOff, yOff, xxOff, yyOff), new MicrofacetMaterial({ opacity: Utils.rand(), roughness: Math.random() * 0.1}));
             // else
             //     scene.add(new Edge(xOff, yOff, xxOff, yyOff), new MicrofacetMaterial({ opacity: Utils.rand(), roughness: Math.random() * 0.02}));
 
-            // scene.add(new Edge(xOff, yOff, xxOff, yyOff), new MicrofacetMaterial({ opacity: Utils.rand(), roughness: Math.random() * 0.02}));
+            // scene.add(new Edge(xOff, yOff, xxOff, yyOff), new MicrofacetMaterial({ opacity: Utils.rand(), roughness: Utils.rand() * 0.02}));
+            scene.add(new Edge(xOff, yOff, xxOff, yyOff), new LambertMaterial({ opacity: Utils.rand() }));
 
-            scene.add(new Circle(xOff, yOff, Utils.rand() * 1.4), new MicrofacetMaterial({ opacity: Utils.rand() * 0.6 + 0.3, roughness: Utils.rand() * 0.03}));
+            // scene.add(new Circle(xOff, yOff, Utils.rand() * 1.4), new MicrofacetMaterial({ opacity: Utils.rand() * 0.6 + 0.3, roughness: Utils.rand() * 0.03}));
         }
     
         // scene.add(new Edge(10, -8, -8, -8), new MicrofacetMaterial({ opacity: 1, roughness: 0.01}));
@@ -87,7 +94,7 @@ onmessage = e => {
 
 
 
-        let cs = 10.5;
+        let cs = 43.5;
         
         // scene.add(new Edge(0.5, 10, -0.5, 10), new BeamEmitterMaterial({ opacity: 1, color: [30 * cs, 30 * cs, 30 * cs], beamDirection: [0, -1] }));
         // for(let i = 0; i < 2; i++) {
@@ -102,12 +109,18 @@ onmessage = e => {
         //     let b = i === 0 ? 0.2 : 1;
         //     scene.add(new Edge(x, y, x-0.0001, y), new BeamEmitterMaterial({ opacity: 0, color: [r * cs, g * cs, b * cs], beamDirection: [0, -1] }));    
         // }
-        let xx = 4;
-        scene.add(new Edge(-xx, 9.9, -xx + 0.1, 9.9), new BeamEmitterMaterial({ opacity: 0, color: [1 * cs, 5 * cs, 30 * cs], beamDirection: [0, -1] }));    
-        scene.add(new Edge(xx-0.1, 9.9, xx, 9.9), new BeamEmitterMaterial({ opacity: 0, color: [30 * cs, 5 * cs, 1 * cs], beamDirection: [0, -1] }));    
+        let ystart = 4;
+        let xx = 8;
+        let beamwidth = 3; 
+        // scene.add(new Edge(-xx, ystart, -xx + beamwidth, ystart), new BeamEmitterMaterial({ opacity: 0, color: [0.5 * cs, 3 * cs, 50 * cs], beamDirection: [0, -1] }));    
+        // scene.add(new Edge(xx-beamwidth, ystart, xx, ystart), new BeamEmitterMaterial({ opacity: 0, color: [30 * cs, 2 * cs, 0.5 * cs], beamDirection: [0, -1] }));    
 
         // scene.add(new Circle(9.9, -9.9, 0.05), new EmitterMaterial({ opacity: 0, color: [5 * cs, 5 * cs, 5 * cs] }));
         // scene.add(new Circle(7, 12.5, 0.5), new EmitterMaterial({ opacity: 0, color: [3 * cs, 10 * cs, 30 * cs] }));
+
+        // scene.add(new Circle(7, 12.5, 0.5), new EmitterMaterial({ opacity: 0, color: [3 * cs, 10 * cs, 30 * cs] }));
+        scene.add(new Circle(0, 4, 0.001), new EmitterMaterial({ opacity: 0.5, color: [150 * cs, 150 * cs, 150 * cs], sampleWeight: 0.05 } ));
+        scene.add(new Circle(0, 4, 1), new EmitterMaterial({ opacity: 1,       color: [15 * cs, 15 * cs, 15 * cs] }));
 
 
         requestAnimationFrame(renderSample);
@@ -124,14 +137,6 @@ function renderSample() {
     requestAnimationFrame(renderSample);
 
 
-    // for(let i = canvasSize - 1; i >= 0; i--)
-    // for(let j = 0; j < canvasSize; j++) {
-    //     let pixel = pixelBuffer[i][j];
-    //     // we need to reset the value stored previously each time we compute a new sample otherwise main.js accumulates astronomical numbers
-    //     pixel.r = 0;
-    //     pixel.g = 0;
-    //     pixel.b = 0;
-    // }
     // // also make sure to reset this
     coloredPixels = 0;
 
@@ -149,8 +154,8 @@ function renderSample() {
 }
 
 
-function colorPhoton(ray, t, WORLD_SIZE, emitterColor, contribution, worldAttenuation) {
-    let worldPixelSize = WORLD_SIZE / canvasSize;
+function colorPhoton(ray, t, emitterColor, contribution, worldAttenuation) {
+    let worldPixelSize = WORLD_SIZE.h / canvasSize.height;
     let step = worldPixelSize;
     let steps = Math.floor(t / step);
     // only used if "steps" ends up being 0
@@ -163,56 +168,53 @@ function colorPhoton(ray, t, WORLD_SIZE, emitterColor, contribution, worldAttenu
         stepAttenuation = t / step;
     }
 
-    if(t < 0.01) {
-        let debug = 0;
-    }
-
     let worldPoint = vec2.create();
     let tmp        = vec2.create();
     let previousPixel = [-1, -1];
 
 
-    if(!Globals.RENDER_TYPE_NOISE) {
+    // THIS SAMPLING METHOD IS DEPRECATED!! IT USES THE OLD ASSUMPTION THAT THE CANVAS IS A SQUARE
+    // if(!Globals.RENDER_TYPE_NOISE) {
 
-        for(let i = 0; i < steps; i++) {
-            let t = step * (i + Math.random() * 1);
-            vec2.scaleAndAdd(worldPoint, ray.o, ray.d, t);
+    //     for(let i = 0; i < steps; i++) {
+    //         let t = step * (i + Math.random() * 1);
+    //         vec2.scaleAndAdd(worldPoint, ray.o, ray.d, t);
 
-            // convert world point to pixel coordinate
-            let u = (worldPoint[0] + WORLD_SIZE / 2) / WORLD_SIZE;
-            let v = (worldPoint[1] + WORLD_SIZE / 2) / WORLD_SIZE;
+    //         // convert world point to pixel coordinate
+    //         let u = (worldPoint[0] + WORLD_SIZE / 2) / WORLD_SIZE;
+    //         let v = (worldPoint[1] + WORLD_SIZE / 2) / WORLD_SIZE;
 
-            let px = Math.floor(u * canvasSize);
-            let py = Math.floor(v * canvasSize);
+    //         let px = Math.floor(u * canvasSize);
+    //         let py = Math.floor(v * canvasSize);
 
-            let attenuation = Math.exp(-t * worldAttenuation);
+    //         let attenuation = Math.exp(-t * worldAttenuation);
 
-            if(previousPixel[0] == px && previousPixel[1] == py || px >= canvasSize || py >= canvasSize || px < 0 || py < 0) {
-                continue;
-            } else {
-                previousPixel[0] = px;
-                previousPixel[1] = py;
+    //         if(previousPixel[0] == px && previousPixel[1] == py || px >= canvasSize || py >= canvasSize || px < 0 || py < 0) {
+    //             continue;
+    //         } else {
+    //             previousPixel[0] = px;
+    //             previousPixel[1] = py;
 
-                let index = (py * canvasSize + px) * 3;
+    //             let index = (py * canvasSize + px) * 3;
 
-                // let prevR = Atomics.load(sharedArray, index + 0);
-                // let prevG = Atomics.load(sharedArray, index + 1);
-                // let prevB = Atomics.load(sharedArray, index + 2);
-                // Atomics.store(sharedArray, index + 0, prevR + emitterColor[0] * contribution * attenuation);
-                // Atomics.store(sharedArray, index + 1, prevG + emitterColor[1] * contribution * attenuation);
-                // Atomics.store(sharedArray, index + 2, prevB + emitterColor[2] * contribution * attenuation);
+    //             // let prevR = Atomics.load(sharedArray, index + 0);
+    //             // let prevG = Atomics.load(sharedArray, index + 1);
+    //             // let prevB = Atomics.load(sharedArray, index + 2);
+    //             // Atomics.store(sharedArray, index + 0, prevR + emitterColor[0] * contribution * attenuation);
+    //             // Atomics.store(sharedArray, index + 1, prevG + emitterColor[1] * contribution * attenuation);
+    //             // Atomics.store(sharedArray, index + 2, prevB + emitterColor[2] * contribution * attenuation);
 
-                let prevR = sharedArray[index + 0];
-                let prevG = sharedArray[index + 1];
-                let prevB = sharedArray[index + 2];
-                sharedArray[index + 0] = prevR + emitterColor[0] * contribution * attenuation * stepAttenuation;
-                sharedArray[index + 1] = prevG + emitterColor[1] * contribution * attenuation * stepAttenuation;
-                sharedArray[index + 2] = prevB + emitterColor[2] * contribution * attenuation * stepAttenuation;
-            }
-        }
+    //             let prevR = sharedArray[index + 0];
+    //             let prevG = sharedArray[index + 1];
+    //             let prevB = sharedArray[index + 2];
+    //             sharedArray[index + 0] = prevR + emitterColor[0] * contribution * attenuation * stepAttenuation;
+    //             sharedArray[index + 1] = prevG + emitterColor[1] * contribution * attenuation * stepAttenuation;
+    //             sharedArray[index + 2] = prevB + emitterColor[2] * contribution * attenuation * stepAttenuation;
+    //         }
+    //     }
 
-        coloredPixels += steps;
-    }
+    //     coloredPixels += steps;
+    // }
 
 
 
@@ -239,21 +241,21 @@ function colorPhoton(ray, t, WORLD_SIZE, emitterColor, contribution, worldAttenu
             vec2.scaleAndAdd(worldPoint, ray.o, ray.d, tt);
     
             // convert world point to pixel coordinate
-            let u = (worldPoint[0] + WORLD_SIZE / 2) / WORLD_SIZE;
-            let v = (worldPoint[1] + WORLD_SIZE / 2) / WORLD_SIZE;
+            let u = (worldPoint[0] + WORLD_SIZE.w / 2) / WORLD_SIZE.w;
+            let v = (worldPoint[1] + WORLD_SIZE.h / 2) / WORLD_SIZE.h;
     
-            let px = Math.floor(u * canvasSize);
-            let py = Math.floor(v * canvasSize);
+            let px = Math.floor(u * canvasSize.width);
+            let py = Math.floor(v * canvasSize.height);
     
             let attenuation = Math.exp(-tt * worldAttenuation);
     
-            if(previousPixel[0] == px && previousPixel[1] == py || px >= canvasSize || py >= canvasSize || px < 0 || py < 0) {
+            if(previousPixel[0] == px && previousPixel[1] == py || px >= canvasSize.width || py >= canvasSize.height || px < 0 || py < 0) {
                 continue;
             } else {
                 previousPixel[0] = px;
                 previousPixel[1] = py;
     
-                let index = (py * canvasSize + px) * 3;
+                let index = (py * canvasSize.width + px) * 3;
 
                 // let prevR = Atomics.load(sharedArray, index + 0);
                 // let prevG = Atomics.load(sharedArray, index + 1);
@@ -287,7 +289,7 @@ function emitPhotons() {
         let debug = 0;
     }
 
-    let contribution = 1.0;
+    let contribution = 1.0;                         // Globals.WORLD_SIZE refers to the vertical size of the world 
     let worldAttenuation = Globals.worldAttenuation * (1.0 / Globals.WORLD_SIZE);
 
 
@@ -296,7 +298,7 @@ function emitPhotons() {
         
         // if we had an intersection
         if(result.t) {
-            colorPhoton(ray, result.t /*(result.t - Globals.epsilon)*/, WORLD_SIZE, color, contribution, worldAttenuation);
+            colorPhoton(ray, result.t /*(result.t - Globals.epsilon)*/, color, contribution, worldAttenuation);
 
 
             // ***** just used for animation 

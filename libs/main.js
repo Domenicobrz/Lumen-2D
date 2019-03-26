@@ -30,10 +30,10 @@ var workers = [];
 
 function init() {
     canvas = document.getElementById('canvas');
-	canvas.width  = canvasSize;
-	canvas.height = canvasSize;
+	canvas.width  = canvasSize.width;
+	canvas.height = canvasSize.height;
 	context = canvas.getContext('2d');
-    imageDataObject = context.createImageData(canvasSize, canvasSize);
+    imageDataObject = context.createImageData(canvasSize.width, canvasSize.height);
 
 
     // BVH debug test 
@@ -47,7 +47,7 @@ function init() {
     }
 
 
-    var length = canvasSize * canvasSize * 3;
+    var length = canvasSize.width * canvasSize.height * 3;
     var size = Float32Array.BYTES_PER_ELEMENT * length;
     var sharedBuffer = new SharedArrayBuffer(size);
     sharedArray = new Float32Array(sharedBuffer);
@@ -149,13 +149,13 @@ function renderSample() {
     let exposure = Globals.exposure;
 
     // fill with base color
-    for (var i = 0; i < canvasSize * canvasSize * 4; i += 4)
+    for (var i = 0; i < canvasSize.width * canvasSize.height * 4; i += 4)
     {
         let pixelIndex = Math.floor(i / 4);
-        let y = canvasSize - Math.floor(pixelIndex / canvasSize) - 1;
-        let x = pixelIndex % canvasSize;
+        let y = canvasSize.height - Math.floor(pixelIndex / canvasSize.width) - 1;
+        let x = pixelIndex % canvasSize.width;
 
-        let index = (y * canvasSize + x) * 3;
+        let index = (y * canvasSize.width + x) * 3;
 
         // let r = Atomics.load(sharedArray, index + 0) / (photonsFired * 0.001);
         // let g = Atomics.load(sharedArray, index + 1) / (photonsFired * 0.001);
@@ -203,29 +203,30 @@ function renderSample() {
 
 
 
-function debugBvh() {
+// function debugBvh() {
     
-    scene = new Scene();    
+//     scene = new Scene();    
     
-    let edgesCount = 500;
-    for(let i = 0; i < edgesCount; i++) {
-        let x  = ( Math.random() * 2 - 1 ) * 0.35;
-        let y  = ( Math.random() * 2 - 1 ) * 0.35;
-        let ex = ( Math.random() * 2 - 1 ) * 0.35;
-        let ey = ( Math.random() * 2 - 1 ) * 0.35;
+//     let edgesCount = 500;
+//     for(let i = 0; i < edgesCount; i++) {
+//         let x  = ( Math.random() * 2 - 1 ) * 0.35;
+//         let y  = ( Math.random() * 2 - 1 ) * 0.35;
+//         let ex = ( Math.random() * 2 - 1 ) * 0.35;
+//         let ey = ( Math.random() * 2 - 1 ) * 0.35;
 
-        let ox = Math.random() * 17.9 - 8.9;
-        let oy = Math.random() * 17.9 - 8.9;
+//         let ox = Math.random() * 17.9 - 8.9;
+//         let oy = Math.random() * 17.9 - 8.9;
 
-        // let edge = new Edge(x, y, x, y + 1);
-        let edge = new Edge(x + ox, y + oy, ex + ox, ey + oy);
-        scene.add(edge);
-    }
+//         // let edge = new Edge(x, y, x, y + 1);
+//         let edge = new Edge(x + ox, y + oy, ex + ox, ey + oy);
+//         scene.add(edge);
+//     }
 
-    let ray  = new Ray(vec2.fromValues(6, 0), vec2.fromValues(-0.7, 0.7));
+//     let ray  = new Ray(vec2.fromValues(6, 0), vec2.fromValues(-0.7, 0.7));
 
-    scene.add(new Edge(-9, -9, -9, 9));
+//     scene.add(new Edge(-9, -9, -9, 9));
 
-    let bvh = new BVH(scene._objects);
-    bvh.debug(context, canvasSize, canvasSize, Globals.WORLD_SIZE / 2, Globals.WORLD_SIZE / 2, ray);
-}
+//     let bvh = new BVH(scene._objects);
+//     // WORLD_SIZE has changed since this function was created! it now allows for differing widths and heights
+//     bvh.debug(context, canvasSize, canvasSize, Globals.WORLD_SIZE / 2, Globals.WORLD_SIZE / 2, ray);
+// }

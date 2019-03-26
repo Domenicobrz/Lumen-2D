@@ -6,12 +6,17 @@ var Globals = {
 
     WORLD_SIZE: 20,     // effectively means the horizontal extent will be
                         // [ -WORLD_SIZE/2 ,  +WORLD_SIZE/2 ]
+                        // the specified size is related to the height of the viewport, the width depends on the aspect ratio
     worldAttenuation: 0.2, 
     LIGHT_BOUNCES: 15,
 
-    canvasSize: 1000,
+    canvasSize: { 
+        width:  1910,
+        height: 995,
+    },
 
-    workersCount: 6,
+
+    workersCount: 5,
 
 
     // Reinhard tonemapping settings
@@ -19,7 +24,6 @@ var Globals = {
     gamma: 2.2,
     exposure: 1,
     // Reinhard tonemapping settings - END
-
 }
 
 export { Globals };
