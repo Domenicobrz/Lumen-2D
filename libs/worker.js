@@ -21,6 +21,9 @@ var coloredPixels = 0;
 var frameSkipperValue = 0; // 100;
 var frameSkipperCount = 0;
 var sharedArray;
+var sharedArray2;
+
+var workerIndex;
 
 var WORLD_SIZE = {
     w: 0,
@@ -36,6 +39,7 @@ onmessage = e => {
         canvasSize = e.data.canvasSize;
 
         sharedArray = new Float32Array(e.data.sharedBuffer);
+        sharedArray2 = new Float32Array(e.data.sharedBuffer2);
 
         // passing globals from main.js since they could change while the app is running
         Globals = e.data.Globals;
@@ -44,7 +48,7 @@ onmessage = e => {
         LIGHT_BOUNCES = Globals.LIGHT_BOUNCES; 
 
 
-        let workerIndex = e.data.workerIndex;
+        workerIndex = e.data.workerIndex;
 
         scene = new Scene({
             showBVHdebug: workerIndex === 0 ? true : false,
@@ -66,14 +70,14 @@ onmessage = e => {
         scene.add(bedge, edgeMaterial);
     
 
-        let count = 500;
+        let count = 1500;
         let radius = 7.5;
         for(let i = 0; i < count; i++) {
             // scene.add(new Circle(Utils.rand() * 19 - 9, Utils.rand() * 15 - 9, Utils.rand() * 0.8),   new MatteMaterial({ opacity: Utils.rand() * 0.5 }));
             let xOff = Utils.rand() * 39 - 19;
             let yOff = Utils.rand() * 16 - 9.5;
-            let yyOff = yOff + (Utils.rand() * 1 - 0.5) * Math.abs(yOff - 10) * 0.15;
-            let xxOff = xOff + (Utils.rand() * 1 - 0.5) * Math.abs(yOff - 10) * 0.15;
+            let yyOff = yOff + (Utils.rand() * 1 - 0.5) * Math.abs(yOff - 5) * 0.25;
+            let xxOff = xOff + (Utils.rand() * 1 - 0.5) * Math.abs(yOff - 5) * 0.25;
 
             // let xxOff = 0.2;
             // xxOff = Utils.rand();
@@ -83,8 +87,8 @@ onmessage = e => {
             // else
             //     scene.add(new Edge(xOff, yOff, xxOff, yyOff), new MicrofacetMaterial({ opacity: Utils.rand(), roughness: Math.random() * 0.02}));
 
-            // scene.add(new Edge(xOff, yOff, xxOff, yyOff), new MicrofacetMaterial({ opacity: Utils.rand(), roughness: Utils.rand() * 0.02}));
-            scene.add(new Edge(xOff, yOff, xxOff, yyOff), new LambertMaterial({ opacity: Utils.rand() }));
+            scene.add(new Edge(xOff, yOff, xxOff, yyOff), new MicrofacetMaterial({ opacity: Utils.rand(), roughness: Utils.rand() * 0.02}));
+            // scene.add(new Edge(xOff, yOff, xxOff, yyOff), new LambertMaterial({ opacity: Utils.rand() }));
 
             // scene.add(new Circle(xOff, yOff, Utils.rand() * 1.4), new MicrofacetMaterial({ opacity: Utils.rand() * 0.6 + 0.3, roughness: Utils.rand() * 0.03}));
         }
@@ -94,21 +98,32 @@ onmessage = e => {
 
 
 
-        let cs = 43.5;
+        let cs = 1643.5;
         
-        // scene.add(new Edge(0.5, 10, -0.5, 10), new BeamEmitterMaterial({ opacity: 1, color: [30 * cs, 30 * cs, 30 * cs], beamDirection: [0, -1] }));
-        // for(let i = 0; i < 2; i++) {
-        //     let x = -7 + i * 1;
-        //     let y = 9;
+        let r1 = Utils.rand();
+        let g1 = Utils.rand();
+        let b1 = Utils.rand();
+        
+        let r2 = Utils.rand();
+        let g2 = Utils.rand();
+        let b2 = Utils.rand();
+    
+        let beamCount = 10;
+        let xstart = -15;
+        let xend = 15;
+        for(let i = 0; i <= beamCount; i++) {
+            let t = i / beamCount;
 
-        //     if(i === 0) x = -6.7;
-        //     if(i === 1) x = +7;
+            let y = 9;
+            let x = xstart * t + xend * (1-t);
+            // if(i === 0) x = -6.7;
+            // if(i === 1) x = +7;
 
-        //     let r = i === 0 ? 1 : 0.2;
-        //     let g = 0.4;
-        //     let b = i === 0 ? 0.2 : 1;
-        //     scene.add(new Edge(x, y, x-0.0001, y), new BeamEmitterMaterial({ opacity: 0, color: [r * cs, g * cs, b * cs], beamDirection: [0, -1] }));    
-        // }
+            let r = r1 * t + r2 * (1-t);
+            let g = g1 * t + g2 * (1-t);
+            let b = b1 * t + b2 * (1-t);
+            scene.add(new Edge(x, y, x-0.0001, y), new BeamEmitterMaterial({ opacity: 0, color: [r * cs, g * cs, b * cs], beamDirection: [0, -1] }));    
+        }
         let ystart = 4;
         let xx = 8;
         let beamwidth = 3; 
@@ -119,8 +134,8 @@ onmessage = e => {
         // scene.add(new Circle(7, 12.5, 0.5), new EmitterMaterial({ opacity: 0, color: [3 * cs, 10 * cs, 30 * cs] }));
 
         // scene.add(new Circle(7, 12.5, 0.5), new EmitterMaterial({ opacity: 0, color: [3 * cs, 10 * cs, 30 * cs] }));
-        scene.add(new Circle(0, 4, 0.001), new EmitterMaterial({ opacity: 0.5, color: [150 * cs, 150 * cs, 150 * cs], sampleWeight: 0.05 } ));
-        scene.add(new Circle(0, 4, 1), new EmitterMaterial({ opacity: 1,       color: [15 * cs, 15 * cs, 15 * cs] }));
+        // scene.add(new Circle(0, 4, 0.001), new EmitterMaterial({ opacity: 0.5, color: [150 * cs, 150 * cs, 150 * cs], sampleWeight: 0.05 } ));
+        // scene.add(new Circle(0, 4, 1), new EmitterMaterial({ opacity: 1,       color: [15 * cs, 15 * cs, 15 * cs] }));
 
 
         requestAnimationFrame(renderSample);
@@ -145,6 +160,7 @@ function renderSample() {
 
     for(let i = 0; i < photonCount; i++) {
         emitPhotons();
+        sharedArray2[workerIndex] += 1;
     }
 
     postMessage({

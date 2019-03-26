@@ -14,7 +14,9 @@ var imageDataObject;
 
 var canvasSize = Globals.canvasSize;
 var sharedBuffer;
+var sharedBuffer2;
 var sharedArray;
+var sharedArray2;
 var photonsFired  = 0;
 var coloredPixels = 0;
 var scene;
@@ -49,11 +51,16 @@ function init() {
 
     var length = canvasSize.width * canvasSize.height * 3;
     var size = Float32Array.BYTES_PER_ELEMENT * length;
-    var sharedBuffer = new SharedArrayBuffer(size);
+    var sharedBuffer = new SharedArrayBuffer(size); 
+    // will be used to store information on photons traced
+    var sharedBuffer2 = new SharedArrayBuffer(Globals.workersCount * 4); // needs to be a multiple of 4 for some reason 
     sharedArray = new Float32Array(sharedBuffer);
+    sharedArray2 = new Float32Array(sharedBuffer2);
     for (let i = 0; i < length; i++) {
-        // Atomics.store(sharedArray, i, 0);
         sharedArray[i] = 0;
+    }
+    for (let i = 0; i < Globals.workersCount; i++) {
+        sharedArray2[i] = 0;
     }
 
     let startWorkerObject = {
@@ -61,6 +68,7 @@ function init() {
         scene: { },
         canvasSize: canvasSize,
         sharedBuffer: sharedBuffer,
+        sharedBuffer2: sharedBuffer2,
         workerIndex: 0,
         Globals: Globals,
     };
@@ -148,6 +156,13 @@ function renderSample() {
     let gamma    = Globals.gamma;
     let exposure = Globals.exposure;
 
+
+    // counting how many photons have been traced, each worker will update its slot in sharedArray2
+    let photonsCount = 0;
+    for (let i = 0; i < Globals.workersCount; i++) {
+        photonsCount += sharedArray2[i];
+    }
+
     // fill with base color
     for (var i = 0; i < canvasSize.width * canvasSize.height * 4; i += 4)
     {
@@ -161,9 +176,9 @@ function renderSample() {
         // let g = Atomics.load(sharedArray, index + 1) / (photonsFired * 0.001);
         // let b = Atomics.load(sharedArray, index + 2) / (photonsFired * 0.001);
 
-        let r = sharedArray[index + 0] / (photonsFired);
-        let g = sharedArray[index + 1] / (photonsFired);
-        let b = sharedArray[index + 2] / (photonsFired);
+        let r = sharedArray[index + 0] / (photonsCount);
+        let g = sharedArray[index + 1] / (photonsCount);
+        let b = sharedArray[index + 2] / (photonsCount);
 
 
         // tone mapping

@@ -27,7 +27,7 @@ function xmur3(str) {
     }
 }
 
-var seed = xmur3("apples4");
+var seed = xmur3("apples10");
 
 Utils.rand = sfc32(seed(), seed(), seed(), seed());
 
