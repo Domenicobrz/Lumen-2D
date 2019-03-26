@@ -4,7 +4,7 @@ import { MatteMaterial } from "./material/matte.js";
 import { Edge } from "./geometry/Edge.js";
 import { BVH } from "./bvh.js";
 import { Ray } from "./ray.js";
-import { glMatrix, vec2, mat2 } from "./dependencies/gl-matrix-es6.js";
+import { glMatrix, vec2, mat2, vec3 } from "./dependencies/gl-matrix-es6.js";
 
 window.addEventListener("load", init);
 
@@ -143,6 +143,11 @@ function renderSample() {
 
 	var imageData = imageDataObject.data;
 
+    let mapped = vec3.create();
+    let hdrColor = vec3.create();
+    let gamma    = Globals.gamma;
+    let exposure = Globals.exposure;
+
     // fill with base color
     for (var i = 0; i < canvasSize * canvasSize * 4; i += 4)
     {
@@ -156,14 +161,32 @@ function renderSample() {
         // let g = Atomics.load(sharedArray, index + 1) / (photonsFired * 0.001);
         // let b = Atomics.load(sharedArray, index + 2) / (photonsFired * 0.001);
 
-        let r = sharedArray[index + 0] / (photonsFired * 0.1);
-        let g = sharedArray[index + 1] / (photonsFired * 0.1);
-        let b = sharedArray[index + 2] / (photonsFired * 0.1);
+        let r = sharedArray[index + 0] / (photonsFired);
+        let g = sharedArray[index + 1] / (photonsFired);
+        let b = sharedArray[index + 2] / (photonsFired);
 
 
-        r *= 255;
-        g *= 255;
-        b *= 255;
+        // tone mapping
+        if(Globals.toneMapping) {
+            // Exposure tone mapping
+            // from: https://learnopengl.com/Advanced-Lighting/HDR
+            mapped[0] = 1 - Math.exp(-r * exposure);
+            mapped[1] = 1 - Math.exp(-g * exposure);
+            mapped[2] = 1 - Math.exp(-b * exposure);
+
+            mapped[0] = Math.pow(mapped[0], 1 / gamma);
+            mapped[1] = Math.pow(mapped[1], 1 / gamma);
+            mapped[2] = Math.pow(mapped[2], 1 / gamma);
+
+            r = mapped[0] * 255;
+            g = mapped[1] * 255;
+            b = mapped[2] * 255;
+        } else {
+            r *= 255;
+            g *= 255;
+            b *= 255;
+        }
+
 
         if(r > 255) r = 255;
         if(g > 255) g = 255;

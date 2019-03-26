@@ -6,12 +6,20 @@ var Globals = {
 
     WORLD_SIZE: 20,     // effectively means the horizontal extent will be
                         // [ -WORLD_SIZE/2 ,  +WORLD_SIZE/2 ]
-    worldAttenuation: 0.2,
+    worldAttenuation: 0.2, 
     LIGHT_BOUNCES: 15,
 
     canvasSize: 1000,
 
     workersCount: 6,
+
+
+    // Reinhard tonemapping settings
+    toneMapping: true,
+    gamma: 2.2,
+    exposure: 1,
+    // Reinhard tonemapping settings - END
+
 }
 
 export { Globals };
