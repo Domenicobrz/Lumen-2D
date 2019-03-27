@@ -14,6 +14,7 @@ var imageDataObject;
 
 var canvasSize = Globals.canvasSize;
 var sharedBuffer;
+// used to track how many photons have been fired
 var sharedBuffer2;
 var sharedArray;
 var sharedArray2;
