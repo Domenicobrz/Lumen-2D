@@ -92,10 +92,10 @@ onmessage = e => {
 
             // scene.add(new Circle(xOff, yOff, Math.pow(Utils.rand(), 3.0) * 1.4), new LambertMaterial({ opacity: Utils.rand() * 0.3 + 0.6, roughness: Utils.rand() * 0.03}));
             
-            // if(i % 2 === 0)
-            //     scene.add(new Circle(xOff, yOff, Math.pow(Utils.rand(), 3.0) * 1.4), new LambertMaterial({ opacity: Utils.rand() * 0.7 + 0.1, roughness: Utils.rand() * 0.03}));
+            // if(i % 6 === 0)
+            //     scene.add(new Circle(xOff, yOff, Math.pow(Utils.rand(), 3.0) * 2), new LambertMaterial({ opacity: Utils.rand() * 0.7 + 0.1, roughness: Utils.rand() * 0.03}));
             // else
-            //     scene.add(new Circle(xOff, yOff, Math.pow(Utils.rand(), 3.0) * 1.4), new MicrofacetMaterial({ opacity: Utils.rand() * 0.6 + 0.3, roughness: Utils.rand() * 0.01}));
+            //     scene.add(new Circle(xOff, yOff, Math.pow(Utils.rand(), 3.0) * 2, Utils.rand()), new MicrofacetMaterial({ opacity: Utils.rand() * 0.6 + 0.3, roughness: Utils.rand() * 0.01}));
 
         }
     
@@ -104,9 +104,9 @@ onmessage = e => {
 
          
         
-        scene.add(new Circle(0, 0, 1), new LambertMaterial({ opacity:   0.6 }));
-        scene.add(new Circle(2, 0, 1.5), new LambertMaterial({ opacity: 0.6 }));
-        scene.add(new Circle(-2, 0, 2),   new LambertMaterial({ opacity: 0.6 }));
+        // scene.add(new Circle(0, 0, 1.5, 0.5), new LambertMaterial({ opacity: 0.8 }));
+        // scene.add(new Circle(2, 0, 1.5), new LambertMaterial({ opacity: 0.6 }));
+        // scene.add(new Circle(-2, 0, 2),   new LambertMaterial({ opacity: 0.6 }));
 
 
         let cs = 38.5;
@@ -136,17 +136,18 @@ onmessage = e => {
         //     scene.add(new Edge(x, y, x-0.0001, y), new BeamEmitterMaterial({ opacity: 0, color: [r * cs, g * cs, b * cs], beamDirection: [0, -1] }));    
         // }
         let ystart = 9;
-        let xx = 3;
-        let beamwidth = 6; 
+        let xx = 5;
+        let beamwidth = 0.1; 
         // scene.add(new Edge(-xx, ystart, -xx + beamwidth, ystart), new BeamEmitterMaterial({ opacity: 0, color: [0.5 * cs, 3 * cs, 50 * cs], beamDirection: [0, -1] }));    
-        // scene.add(new Edge(xx-beamwidth, ystart, xx, ystart), new BeamEmitterMaterial({ opacity: 0, color: [30 * cs, 2 * cs, 0.5 * cs], beamDirection: [0, -1] }));    
+        // scene.add(new Edge(xx-beamwidth+2, ystart, xx+2, ystart), new BeamEmitterMaterial({ opacity: 0, color: [30 * cs, 2 * cs, 0.5 * cs], beamDirection: [0, -1] }));    
 
         // scene.add(new Circle(9.9, -9.9, 0.05), new EmitterMaterial({ opacity: 0, color: [5 * cs, 5 * cs, 5 * cs] }));
         scene.add(new Circle(0, 9, 1), new EmitterMaterial({ opacity: 0, color: [3 * cs, 10 * cs, 30 * cs] }));
 
-        // scene.add(new Circle(7, 12.5, 0.5), new EmitterMaterial({ opacity: 0, color: [3 * cs, 10 * cs, 30 * cs] }));
-        // scene.add(new Circle(0, 4, 0.001), new EmitterMaterial({ opacity: 0.5, color: [150 * cs, 150 * cs, 150 * cs], sampleWeight: 0.05 } ));
-        // scene.add(new Circle(0, 4, 1), new EmitterMaterial({ opacity: 1,       color: [15 * cs, 15 * cs, 15 * cs] }));
+      
+        scene.add(new Edge(-2, 0, 2, 0, 0.8), new LambertMaterial({ opacity: 1 }));    
+        scene.add(new Circle(-2, 0, 1, 0.9), new LambertMaterial({ opacity: 1 }));    
+
 
         requestAnimationFrame(renderSample);
     }
@@ -311,7 +312,7 @@ function emitPhoton() {
     let ray = photon.ray;
     let color = photon.color;
 
-    if(ray.o[0] < -0.048 && ray.o[1] < 9) {
+    if(ray.d[1] < -0.95) {
         let debug = 0;
     }
 
@@ -324,6 +325,10 @@ function emitPhoton() {
         
         // if we had an intersection
         if(result.t) {
+
+            let object = result.object;
+            let material = object.material;
+
             colorPhoton(ray, result.t /*(result.t - Globals.epsilon)*/, color, contribution, worldAttenuation);
 
 
@@ -332,12 +337,9 @@ function emitPhoton() {
             // while(Date.now() - cd < 10) { /* do nothing */ }
             // ***** just used for animation - END 
 
-
-            let object = result.object;
-            let material = object.material;
-
             let scatterResult = object.material.computeScattering(ray, result.normal, result.t, contribution, worldAttenuation);
             contribution = scatterResult.contribution;
+
 
             if(contribution < 0.01) return;
         }

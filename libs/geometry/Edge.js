@@ -3,7 +3,7 @@ import { glMatrix, vec2 } from "./../dependencies/gl-matrix-es6.js";
 import { AABB } from "./AABB.js";
 
 class Edge extends Geometry {
-    constructor(x, y, dx, dy, nx, ny) {
+    constructor(x, y, dx, dy, blur, nx, ny) {
         super();
 
         this.v0 = vec2.fromValues(x, y);
@@ -11,8 +11,23 @@ class Edge extends Geometry {
         this.aabb = new AABB();
         this.aabb.addVertex(this.v0);
         this.aabb.addVertex(this.v1);
+
+
+        this.blur = blur || 0;
+        if(this.blur > 0) {
+            let minx = Math.min(x, dx) - this.blur;
+            let miny = Math.min(y, dy) - this.blur;
+            let maxx = Math.max(x, dx) + this.blur;
+            let maxy = Math.max(y, dy) + this.blur;
+            let blurV0 = vec2.fromValues(minx, miny);
+            let blurV1 = vec2.fromValues(maxx, maxy);
+            this.aabb.addVertex(blurV0);
+            this.aabb.addVertex(blurV1);
+        }
+
         this.center = vec2.fromValues((this.v0[0] + this.v1[0]) / 2, 
                                       (this.v0[1] + this.v1[1]) / 2);
+
 
         if(nx !== undefined && ny !== undefined) {
             this.normal = vec2.fromValues(nx, ny);
@@ -34,6 +49,21 @@ class Edge extends Geometry {
         let p2_y = this.v0[1];
         let p3_x = this.v1[0]; 
         let p3_y = this.v1[1];
+        if(this.blur > 0) {
+            // perturb this edge's center
+            // since the AABB was expanded to fit this perturbation we can be sure
+            // everything will stay inside the AABB bounds
+            let randomAngle = Math.random() * Math.PI * 2;
+            // multiplying by 0.9999 to make absolutely sure we don't get out of the aabb bounds (?) though I'm not sure at this point if it makes any sense
+            let randomRadius = this.blur * 0.9999 * Math.random();
+            let offx = randomRadius * Math.cos(randomAngle);
+            let offy = randomRadius * Math.sin(randomAngle);
+            p2_x += offx;
+            p2_y += offy;            
+            p3_x += offx;
+            p3_y += offy;
+        }
+
         let s1_x, s1_y, s2_x, s2_y;
         s1_x = p1_x - p0_x;     s1_y = p1_y - p0_y;
         s2_x = p3_x - p2_x;     s2_y = p3_y - p2_y;

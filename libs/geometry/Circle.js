@@ -3,7 +3,7 @@ import { glMatrix, vec2 } from "./../dependencies/gl-matrix-es6.js";
 import { AABB } from "./AABB.js";
 
 class Circle extends Geometry {
-    constructor(x, y, radius) {
+    constructor(x, y, radius, blur) {
         super();
 
         this.center = vec2.fromValues(x, y);
@@ -12,13 +12,43 @@ class Circle extends Geometry {
         this.aabb = new AABB();
         this.aabb.addVertex(vec2.fromValues(x - radius, y - radius));
         this.aabb.addVertex(vec2.fromValues(x + radius, y + radius));
+
+        this.blur = blur || 0;
+        if(this.blur > 0) {
+            let minx = x - radius - this.blur;
+            let miny = y - radius - this.blur;
+            let maxx = x + radius + this.blur;
+            let maxy = y + radius + this.blur;
+            let blurV0 = vec2.fromValues(minx, miny);
+            let blurV1 = vec2.fromValues(maxx, maxy);
+            this.aabb.addVertex(blurV0);
+            this.aabb.addVertex(blurV1);
+        }
     }
 
     intersect(ray) {
         let e = ray.d     // e=ray.dir
 
+        let center = vec2.clone(this.center);
+        if(this.blur > 0) {
+            // perturb this edge's center
+            // since the AABB was expanded to fit this perturbation we can be sure
+            // everything will stay inside the AABB bounds
+            let randomAngle = Math.random() * Math.PI * 2;
+            // multiplying by 0.9999 to make absolutely sure we don't get out of the aabb bounds (?) though I'm not sure at this point if it makes any sense
+            let randomRadius = this.blur * 0.9999 * Math.random();
+            let offx = randomRadius * Math.cos(randomAngle);
+            let offy = randomRadius * Math.sin(randomAngle);
+
+            center[0] += offx;
+            center[1] += offy;
+        }
+
+
+        
+
         let h = vec2.create();
-        vec2.sub(h, this.center, ray.o);          // h=r.o-c.M
+        vec2.sub(h, center, ray.o);          // h=r.o-c.M
 
         let lf = vec2.dot(e, h);                  // lf=e.h
         let s  = this.radius * this.radius - vec2.dot(h,h) + lf * lf;   // s=r^2-h^2+lf^2
@@ -48,7 +78,7 @@ class Circle extends Geometry {
 
 
         let normal = vec2.create();
-        vec2.sub(normal, S1, this.center);
+        vec2.sub(normal, S1, center);
         vec2.normalize(normal, normal);
 
 

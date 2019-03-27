@@ -10,6 +10,7 @@ class LambertMaterial extends Material {
 
                        // remember: 0 is a valid opacity option, so we need to check for undefined instead of just going   options.opacity || 1
         this.opacity = options.opacity !== undefined ? options.opacity : 1;
+        this.blur    = options.blur    !== undefined ? options.blur : 0;
     }
 
     computeScattering(ray, input_normal, t, contribution, worldAttenuation) {
@@ -87,7 +88,6 @@ class LambertMaterial extends Material {
         // bounce off again
         let newOrigin = vec2.create();
         vec2.scaleAndAdd(newOrigin, ray.o, ray.d, t - Globals.epsilon); // it's important that the epsilon value is subtracted/added instead of doing t * 0.999999 since that caused floating point precision issues
-    
 
 
         vec2.copy(ray.o, newOrigin);

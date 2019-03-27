@@ -16,7 +16,7 @@ var Globals = {
     },
 
 
-    workersCount: 5,
+    workersCount: 1,
 
 
     // Reinhard tonemapping settings
