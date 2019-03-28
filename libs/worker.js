@@ -44,6 +44,11 @@ onmessage = e => {
 
         // passing globals from main.js since they could change while the app is running
         Globals = e.data.Globals;
+
+        if(Globals.highPrecision)
+            glMatrix.setMatrixArrayType(Float64Array);
+
+
         WORLD_SIZE.h = Globals.WORLD_SIZE;  
         WORLD_SIZE.w = Globals.WORLD_SIZE * (canvasSize.width / canvasSize.height);  
         LIGHT_BOUNCES = Globals.LIGHT_BOUNCES; 
@@ -51,16 +56,32 @@ onmessage = e => {
 
         workerIndex = e.data.workerIndex;
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+
         scene = new Scene({
             showBVHdebug: workerIndex === 0 ? true : false,
         });
     
     
         let edgeMaterial = new LambertMaterial({ opacity: 1 });
-        let tbound = 12;
+        let tbound = 11;
         let lbound = 19.5;
         let rbound = 19.5;
-        let bbound = 12;
+        let bbound = 11;
         let ledge = new Edge(-lbound, -bbound, -lbound,  tbound);
         let redge = new Edge( rbound, -bbound,  rbound,  tbound);
         let tedge = new Edge(-lbound,  tbound,  rbound,  tbound);
@@ -92,7 +113,7 @@ onmessage = e => {
         // }
 
 
-        // scene.add(new Circle(0, 0, 3, 0), new LambertMaterial({ opacity: 0.96 }));
+        scene.add(new Circle(0, 0, 0.2, 0), new LambertMaterial({ opacity: 1 }));
         // scene.add(new Circle(0, 0, 2),    new DielectricMaterial({ opacity: 1, transmittance: 0.25 }));
         // scene.add(new Circle(0, 0, 5), new MicrofacetMaterial({ opacity: 0.7, roughness: 0.01}));
 
@@ -125,13 +146,26 @@ onmessage = e => {
         //     scene.add(new Edge(x, y, x-0.0001, y), new BeamEmitterMaterial({ opacity: 0, color: [r * cs, g * cs, b * cs], beamDirection: [0, -1] }));    
         // }
         let ystart = 9;
-        let xx = 5;
-        let beamwidth = 1; 
-        // scene.add(new Edge(-xx, ystart, -xx + beamwidth, ystart), new BeamEmitterMaterial({ opacity: 0, color: [0.5 * cs, 3 * cs, 50 * cs], beamDirection: [0.5, -1] }));    
+        let xx = 0;
+        let beamwidth = 0.1; 
+        scene.add(new Edge(-xx, ystart, -xx + beamwidth, ystart), new BeamEmitterMaterial({ opacity: 0, color: [5 * cs, 5 * cs, 5 * cs], beamDirection: [0, -1] }));    
         // scene.add(new Edge(xx-beamwidth+2, ystart, xx+2, ystart), new BeamEmitterMaterial({ opacity: 0, color: [30 * cs, 2 * cs, 0.5 * cs], beamDirection: [0, -1] }));    
 
-        scene.add(new Circle(10 * 1.2, -9 * 1.2, 0.5), new EmitterMaterial({ opacity: 0, color: [10 * cs, 10 * cs, 10 * cs] }));
+        // scene.add(new Circle(10 * 1.2, -9 * 1.2, 0.5), new EmitterMaterial({ opacity: 0, color: [10 * cs, 10 * cs, 10 * cs] }));
         // scene.add(new Circle(0, 0, 2), new DielectricMaterial({ opacity: 1 }));
+
+
+
+
+
+
+
+
+
+
+
+
+
 
       
 

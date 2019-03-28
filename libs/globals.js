@@ -1,6 +1,10 @@
 var Globals = {
     epsilon: 0.00005,
 
+    // if set to true, uses Float64Arrays, which are 2x slower to work on
+    highPrecision: false,
+
+
     RENDER_TYPE_NOISE: true,
     PHOTONS_PER_FRAME: 10000,
 
@@ -8,7 +12,7 @@ var Globals = {
                         // [ -WORLD_SIZE/2 ,  +WORLD_SIZE/2 ]
                         // the specified size is related to the height of the viewport, the width depends on the aspect ratio
     worldAttenuation: 0.2, 
-    LIGHT_BOUNCES: 15,
+    LIGHT_BOUNCES: 10,
 
     canvasSize: { 
         width:  1910,
