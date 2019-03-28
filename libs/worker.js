@@ -11,6 +11,7 @@ import { BeamEmitterMaterial } from "./material/beamEmitter.js";
 import { glMatrix, vec2 } from "./dependencies/gl-matrix-es6.js";
 import { Utils } from "./utils.js";
 import { MicrofacetMaterial } from "./material/microfacet.js";
+import { DielectricMaterial } from "./material/dielectric.js";
 
 
 var canvasSize;
@@ -56,12 +57,14 @@ onmessage = e => {
     
     
         let edgeMaterial = new LambertMaterial({ opacity: 1 });
+        let tbound = 12;
         let lbound = 19.5;
         let rbound = 19.5;
-        let ledge = new Edge(-lbound, -10, -lbound,  14);
-        let redge = new Edge( rbound, -10,  rbound,  14);
-        let tedge = new Edge(-lbound,  14,  rbound,  14);
-        let bedge = new Edge(-lbound, -10,  rbound, -10);
+        let bbound = 12;
+        let ledge = new Edge(-lbound, -bbound, -lbound,  tbound);
+        let redge = new Edge( rbound, -bbound,  rbound,  tbound);
+        let tedge = new Edge(-lbound,  tbound,  rbound,  tbound);
+        let bedge = new Edge(-lbound, -bbound,  rbound, -bbound);
     
     
         scene.add(ledge, edgeMaterial);
@@ -70,43 +73,29 @@ onmessage = e => {
         scene.add(bedge, edgeMaterial);
     
 
-        let count = 350;
-        let radius = 7.5;
-        for(let i = 0; i < count; i++) {
-            // scene.add(new Circle(Utils.rand() * 19 - 9, Utils.rand() * 15 - 9, Utils.rand() * 0.8),   new MatteMaterial({ opacity: Utils.rand() * 0.5 }));
-            let xOff = Utils.rand() * 39 - 19;
-            let yOff = Utils.rand() * 13 - 9.5;
-            let yyOff = yOff + (Utils.rand() * 1 - 0.5) * Math.abs(yOff - 5) * 0.25;
-            let xxOff = xOff + (Utils.rand() * 1 - 0.5) * Math.abs(yOff - 5) * 0.25;
+        // let count = 35;
+        // let radius = 7.5;
+        // for(let i = 0; i <= count; i++) {
+        //     let t1 = i / count;
+        //     let angle = t1 * Math.PI * 2;
+        //     let radius = 7;
+        //     let circleRadius  = 0.25 + (Math.sin(angle * 6) * 0.5 + 0.5) * 0.35;
+        //     let circleOpacity = 0.9 + (Math.sin(angle * 6) * 0.5 + 0.5) * 0.1;
 
-            // let xxOff = 0.2;
-            // xxOff = Utils.rand();
+        //     let x1 = Math.cos(angle) * radius; 
+        //     let y1 = Math.sin(angle) * radius;
 
-            // if(i % 10 === 0)
-            //     scene.add(new Edge(xOff, yOff, xxOff, yyOff), new MicrofacetMaterial({ opacity: Utils.rand(), roughness: Math.random() * 0.1}));
-            // else
-            //     scene.add(new Edge(xOff, yOff, xxOff, yyOff), new MicrofacetMaterial({ opacity: Utils.rand(), roughness: Math.random() * 0.02}));
 
-            // scene.add(new Edge(xOff, yOff, xxOff, yyOff), new MicrofacetMaterial({ opacity: Utils.rand(), roughness: Utils.rand() * 0.02}));
-            // scene.add(new Edge(xOff, yOff, xxOff, yyOff), new LambertMaterial({ opacity: Utils.rand() }));
+        //     // let blur = Math.max(Math.abs((x1 + x2)/2) - 4, 0) * 0.08;
 
-            // scene.add(new Circle(xOff, yOff, Math.pow(Utils.rand(), 3.0) * 1.4), new LambertMaterial({ opacity: Utils.rand() * 0.3 + 0.6, roughness: Utils.rand() * 0.03}));
-            
-            // if(i % 6 === 0)
-            //     scene.add(new Circle(xOff, yOff, Math.pow(Utils.rand(), 3.0) * 2), new LambertMaterial({ opacity: Utils.rand() * 0.7 + 0.1, roughness: Utils.rand() * 0.03}));
-            // else
-            //     scene.add(new Circle(xOff, yOff, Math.pow(Utils.rand(), 3.0) * 2, Utils.rand()), new MicrofacetMaterial({ opacity: Utils.rand() * 0.6 + 0.3, roughness: Utils.rand() * 0.01}));
+        //     scene.add(new Circle(x1, y1, circleRadius), new LambertMaterial({ opacity: circleOpacity }));
+        // }
 
-        }
-    
-        // scene.add(new Edge(10, -8, -8, -8), new MicrofacetMaterial({ opacity: 1, roughness: 0.01}));
+
+        // scene.add(new Circle(0, 0, 3, 0), new LambertMaterial({ opacity: 0.96 }));
+        // scene.add(new Circle(0, 0, 2),    new DielectricMaterial({ opacity: 1, transmittance: 0.25 }));
         // scene.add(new Circle(0, 0, 5), new MicrofacetMaterial({ opacity: 0.7, roughness: 0.01}));
 
-         
-        
-        // scene.add(new Circle(0, 0, 1.5, 0.5), new LambertMaterial({ opacity: 0.8 }));
-        // scene.add(new Circle(2, 0, 1.5), new LambertMaterial({ opacity: 0.6 }));
-        // scene.add(new Circle(-2, 0, 2),   new LambertMaterial({ opacity: 0.6 }));
 
 
         let cs = 38.5;
@@ -137,17 +126,14 @@ onmessage = e => {
         // }
         let ystart = 9;
         let xx = 5;
-        let beamwidth = 0.1; 
-        // scene.add(new Edge(-xx, ystart, -xx + beamwidth, ystart), new BeamEmitterMaterial({ opacity: 0, color: [0.5 * cs, 3 * cs, 50 * cs], beamDirection: [0, -1] }));    
+        let beamwidth = 1; 
+        // scene.add(new Edge(-xx, ystart, -xx + beamwidth, ystart), new BeamEmitterMaterial({ opacity: 0, color: [0.5 * cs, 3 * cs, 50 * cs], beamDirection: [0.5, -1] }));    
         // scene.add(new Edge(xx-beamwidth+2, ystart, xx+2, ystart), new BeamEmitterMaterial({ opacity: 0, color: [30 * cs, 2 * cs, 0.5 * cs], beamDirection: [0, -1] }));    
 
-        // scene.add(new Circle(9.9, -9.9, 0.05), new EmitterMaterial({ opacity: 0, color: [5 * cs, 5 * cs, 5 * cs] }));
-        scene.add(new Circle(0, 9, 1), new EmitterMaterial({ opacity: 0, color: [3 * cs, 10 * cs, 30 * cs] }));
+        scene.add(new Circle(10 * 1.2, -9 * 1.2, 0.5), new EmitterMaterial({ opacity: 0, color: [10 * cs, 10 * cs, 10 * cs] }));
+        // scene.add(new Circle(0, 0, 2), new DielectricMaterial({ opacity: 1 }));
 
       
-        scene.add(new Edge(-2, 0, 2, 0, 0.8), new LambertMaterial({ opacity: 1 }));    
-        scene.add(new Circle(-2, 0, 1, 0.9), new LambertMaterial({ opacity: 1 }));    
-
 
         requestAnimationFrame(renderSample);
     }
@@ -339,7 +325,6 @@ function emitPhoton() {
 
             let scatterResult = object.material.computeScattering(ray, result.normal, result.t, contribution, worldAttenuation);
             contribution = scatterResult.contribution;
-
 
             if(contribution < 0.01) return;
         }

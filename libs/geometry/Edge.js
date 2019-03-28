@@ -54,8 +54,7 @@ class Edge extends Geometry {
             // since the AABB was expanded to fit this perturbation we can be sure
             // everything will stay inside the AABB bounds
             let randomAngle = Math.random() * Math.PI * 2;
-            // multiplying by 0.9999 to make absolutely sure we don't get out of the aabb bounds (?) though I'm not sure at this point if it makes any sense
-            let randomRadius = this.blur * 0.9999 * Math.random();
+            let randomRadius = this.blur * Math.random();
             let offx = randomRadius * Math.cos(randomAngle);
             let offy = randomRadius * Math.sin(randomAngle);
             p2_x += offx;

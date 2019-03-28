@@ -1,5 +1,5 @@
 var Globals = {
-    epsilon: 0.000025,
+    epsilon: 0.00005,
 
     RENDER_TYPE_NOISE: true,
     PHOTONS_PER_FRAME: 10000,
