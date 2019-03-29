@@ -4,14 +4,9 @@ import { Edge } from "./geometry/Edge.js";
 import { Circle } from "./geometry/Circle.js";
 import { Ray } from "./ray.js";
 import { Pixel } from "./pixel.js";
-import { LambertMaterial } from "./material/lambert.js";
-import { MatteMaterial } from "./material/matte.js";
-import { EmitterMaterial } from "./material/emitter.js";
-import { BeamEmitterMaterial } from "./material/beamEmitter.js";
 import { glMatrix, vec2 } from "./dependencies/gl-matrix-es6.js";
 import { Utils } from "./utils.js";
-import { MicrofacetMaterial } from "./material/microfacet.js";
-import { DielectricMaterial } from "./material/dielectric.js";
+import { createScene } from "./createScene.js";
 
 
 var canvasSize;
@@ -57,116 +52,12 @@ onmessage = e => {
         workerIndex = e.data.workerIndex;
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-
         scene = new Scene({
             showBVHdebug: workerIndex === 0 ? true : false,
         });
-    
-    
-        let edgeMaterial = new LambertMaterial({ opacity: 1 });
-        let tbound = 11;
-        let lbound = 19.5;
-        let rbound = 19.5;
-        let bbound = 11;
-        let ledge = new Edge(-lbound, -bbound, -lbound,  tbound);
-        let redge = new Edge( rbound, -bbound,  rbound,  tbound);
-        let tedge = new Edge(-lbound,  tbound,  rbound,  tbound);
-        let bedge = new Edge(-lbound, -bbound,  rbound, -bbound);
-    
-    
-        scene.add(ledge, edgeMaterial);
-        scene.add(redge, edgeMaterial);
-        scene.add(tedge, edgeMaterial);
-        scene.add(bedge, edgeMaterial);
-    
-
-        // let count = 35;
-        // let radius = 7.5;
-        // for(let i = 0; i <= count; i++) {
-        //     let t1 = i / count;
-        //     let angle = t1 * Math.PI * 2;
-        //     let radius = 7;
-        //     let circleRadius  = 0.25 + (Math.sin(angle * 6) * 0.5 + 0.5) * 0.35;
-        //     let circleOpacity = 0.9 + (Math.sin(angle * 6) * 0.5 + 0.5) * 0.1;
-
-        //     let x1 = Math.cos(angle) * radius; 
-        //     let y1 = Math.sin(angle) * radius;
 
 
-        //     // let blur = Math.max(Math.abs((x1 + x2)/2) - 4, 0) * 0.08;
-
-        //     scene.add(new Circle(x1, y1, circleRadius), new LambertMaterial({ opacity: circleOpacity }));
-        // }
-
-
-        scene.add(new Circle(0, 0, 0.2, 0), new LambertMaterial({ opacity: 1 }));
-        // scene.add(new Circle(0, 0, 2),    new DielectricMaterial({ opacity: 1, transmittance: 0.25 }));
-        // scene.add(new Circle(0, 0, 5), new MicrofacetMaterial({ opacity: 0.7, roughness: 0.01}));
-
-
-
-        let cs = 38.5;
-        
-        let r1 = Utils.rand();
-        let g1 = Utils.rand();
-        let b1 = Utils.rand();
-        
-        let r2 = Utils.rand();
-        let g2 = Utils.rand();
-        let b2 = Utils.rand();
-    
-        let beamCount = 10;
-        let xstart = -15;
-        let xend = 15;
-        // for(let i = 0; i <= beamCount; i++) {
-        //     let t = i / beamCount;
-
-        //     let y = 9;
-        //     let x = xstart * t + xend * (1-t);
-        //     // if(i === 0) x = -6.7;
-        //     // if(i === 1) x = +7;
-
-        //     let r = r1 * t + r2 * (1-t);
-        //     let g = g1 * t + g2 * (1-t);
-        //     let b = b1 * t + b2 * (1-t);
-        //     scene.add(new Edge(x, y, x-0.0001, y), new BeamEmitterMaterial({ opacity: 0, color: [r * cs, g * cs, b * cs], beamDirection: [0, -1] }));    
-        // }
-        let ystart = 9;
-        let xx = 0;
-        let beamwidth = 0.1; 
-        scene.add(new Edge(-xx, ystart, -xx + beamwidth, ystart), new BeamEmitterMaterial({ opacity: 0, color: [5 * cs, 5 * cs, 5 * cs], beamDirection: [0, -1] }));    
-        // scene.add(new Edge(xx-beamwidth+2, ystart, xx+2, ystart), new BeamEmitterMaterial({ opacity: 0, color: [30 * cs, 2 * cs, 0.5 * cs], beamDirection: [0, -1] }));    
-
-        // scene.add(new Circle(10 * 1.2, -9 * 1.2, 0.5), new EmitterMaterial({ opacity: 0, color: [10 * cs, 10 * cs, 10 * cs] }));
-        // scene.add(new Circle(0, 0, 2), new DielectricMaterial({ opacity: 1 }));
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        createScene(scene);
       
 
         requestAnimationFrame(renderSample);
