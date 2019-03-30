@@ -10,7 +10,6 @@ class LambertMaterial extends Material {
 
                        // remember: 0 is a valid opacity option, so we need to check for undefined instead of just going   options.opacity || 1
         this.opacity = options.opacity !== undefined ? options.opacity : 1;
-        this.blur    = options.blur    !== undefined ? options.blur : 0;
     }
 
     computeScattering(ray, input_normal, t, contribution, worldAttenuation) {

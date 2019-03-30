@@ -1,6 +1,1 @@
-- use vec2.NEGATE instead of vec.INVERSE        inverse will return the reciprocal!! not the negation!
-
-- if a point is an emitter, you need to consider the sphere of directions where it might emit photons! Otherwise you won't see soft shadows on edges !!
-    essentially what you did (and it was wrong) was to:  create a circle as a light source (with a set radius) and emit photons in a single direction 
-    based on the angle of the point on the circle, this is wrong!! you wont be able to cast soft shadows that way since you're directing photons only in a single direction!
-    instead, they should be allowed to fire photons in the sphere of directions as they would naturally do
+- use vec2.NEGATE instead of vec.INVERSE        inverse will return the reciprocal, not the negation!

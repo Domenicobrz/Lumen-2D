@@ -1,3 +1,2 @@
-            if(previousPixel[0] == px && previousPixel[1] == py || px >= canvasSize || py >= canvasSize || px < 0 || py < 0) {
-
-is the previousPixel stuff necessary? It might even cause some errors I think. see that part again.
+• if(previousPixel[0] == px && previousPixel[1] == py || px >= canvasSize || py >= canvasSize || px < 0 || py < 0) {
+    there needs to be an intersection test between the ray and the world scene, and only draw samples inside that area otherwise we can waste A LOT of cpu cycles for nothing

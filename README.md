@@ -1,4 +1,4 @@
-# 2D Javascript Renderer
+# Lumen 2D javascript renderer
 
 <img src="https://user-images.githubusercontent.com/25647854/55277200-b8138000-52fd-11e9-9181-2efc6d4b3870.jpg" width="30%"></img> <img src="https://user-images.githubusercontent.com/25647854/55277201-b8138000-52fd-11e9-9b63-00f1b1b53fad.jpg" width="30%"></img> <img src="https://user-images.githubusercontent.com/25647854/55277202-b8138000-52fd-11e9-92ef-1572bd32d696.jpg" width="30%"></img> <img src="https://user-images.githubusercontent.com/25647854/55277203-b8138000-52fd-11e9-9875-cdde005bf2f8.jpg" width="30%"></img> <img src="https://user-images.githubusercontent.com/25647854/55277204-b8ac1680-52fd-11e9-9ebd-a7b01ad17de7.jpg" width="30%"></img> <img src="https://user-images.githubusercontent.com/25647854/55277205-b8ac1680-52fd-11e9-8fe9-434ec8ddb154.jpg" width="30%"></img> 
 
