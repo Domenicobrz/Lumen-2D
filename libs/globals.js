@@ -12,7 +12,7 @@ var Globals = {
                         // [ -WORLD_SIZE/2 ,  +WORLD_SIZE/2 ]
                         // the specified size is related to the height of the viewport, the width depends on the aspect ratio
     worldAttenuation: 0.2, 
-    LIGHT_BOUNCES: 10,
+    LIGHT_BOUNCES: 30,
 
     canvasSize: { 
         width:  1910,
@@ -20,7 +20,7 @@ var Globals = {
     },
 
 
-    workersCount: 1,
+    workersCount: 5,
 
 
     // Reinhard tonemapping settings

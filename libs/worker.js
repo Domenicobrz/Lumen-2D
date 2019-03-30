@@ -57,7 +57,7 @@ onmessage = e => {
         });
 
 
-        createScene(scene);
+        createScene(scene, e.data);
       
 
         requestAnimationFrame(renderSample);

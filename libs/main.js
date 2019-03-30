@@ -72,6 +72,7 @@ function init() {
         sharedBuffer2: sharedBuffer2,
         workerIndex: 0,
         Globals: Globals,
+        randomNumber: Math.random()
     };
 
     let onWorkerMessage = e => {
