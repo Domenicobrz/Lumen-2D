@@ -23,7 +23,14 @@ class Scene {
             if(this._emittersCdfArray.length !== 0) 
                 prevCdfValue = this._emittersCdfArray[this._emittersCdfArray.length - 1].cdfValue;
 
-            let newCdfValue = prevCdfValue + (object.material.color[0] + object.material.color[1] + object.material.color[2]) * object.material.sampleWeight;
+            let sampleValue;
+            if(object.material.samplePower) {
+                sampleValue = object.material.samplePower;
+            } else {
+                sampleValue = (object.material.color[0] + object.material.color[1] + object.material.color[2]) * object.material.sampleWeight;
+            }   
+
+            let newCdfValue = prevCdfValue + sampleValue;
             this._emittersCdfArray.push({ object: object, cdfValue: newCdfValue });
 
             this._emittersCdfMax = newCdfValue;

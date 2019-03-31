@@ -12,7 +12,7 @@ class LambertMaterial extends Material {
         this.opacity = options.opacity !== undefined ? options.opacity : 1;
     }
 
-    computeScattering(ray, input_normal, t, contribution, worldAttenuation) {
+    computeScattering(ray, input_normal, t, contribution, worldAttenuation, wavelength) {
 
         let scatterResult = { };
 

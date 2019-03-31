@@ -215,20 +215,96 @@ function colorPhoton(ray, t, emitterColor, contribution, worldAttenuation) {
     }
 }
 
+
+function getRGBfromWavelength(Wavelength) {
+    let Gamma = 0.80;
+    let IntensityMax = 255;
+    let factor;
+    let Red,Green,Blue;
+
+    if((Wavelength >= 380) && (Wavelength<440)){
+        Red = -(Wavelength - 440) / (440 - 380);
+        Green = 0.0;
+        Blue = 1.0;
+    }else if((Wavelength >= 440) && (Wavelength<490)){
+        Red = 0.0;
+        Green = (Wavelength - 440) / (490 - 440);
+        Blue = 1.0;
+    }else if((Wavelength >= 490) && (Wavelength<510)){
+        Red = 0.0;
+        Green = 1.0;
+        Blue = -(Wavelength - 510) / (510 - 490);
+    }else if((Wavelength >= 510) && (Wavelength<580)){
+        Red = (Wavelength - 510) / (580 - 510);
+        Green = 1.0;
+        Blue = 0.0;
+    }else if((Wavelength >= 580) && (Wavelength<645)){
+        Red = 1.0;
+        Green = -(Wavelength - 645) / (645 - 580);
+        Blue = 0.0;
+    }else if((Wavelength >= 645) && (Wavelength<781)){
+        Red = 1.0;
+        Green = 0.0;
+        Blue = 0.0;
+    }else{
+        Red = 0.0;
+        Green = 0.0;
+        Blue = 0.0;
+    };
+
+    // Let the intensity fall off near the vision limits
+
+    if((Wavelength >= 380) && (Wavelength<420)){
+        factor = 0.3 + 0.7*(Wavelength - 380) / (420 - 380);
+    }else if((Wavelength >= 420) && (Wavelength<701)){
+        factor = 1.0;
+    }else if((Wavelength >= 701) && (Wavelength<781)){
+        factor = 0.3 + 0.7*(780 - Wavelength) / (780 - 700);
+    }else{
+        factor = 0.0;
+    };
+
+
+    let rgb = [0,0,0];
+
+    // Don't want 0^x = 1 for x <> 0
+    rgb[0] = Red === 0 ? 0 : Math.floor(   Math.round(IntensityMax * Math.pow(Red * factor, Gamma))   );
+    rgb[1] = Green === 0 ? 0 : Math.floor(   Math.round(IntensityMax * Math.pow(Green * factor, Gamma))   );
+    rgb[2] = Blue === 0 ? 0 : Math.floor(   Math.round(IntensityMax * Math.pow(Blue * factor, Gamma))   );
+
+    return rgb;
+}
+
+function getColorFromEmitterSpectrum(spectrum) {
+    let color;
+
+    if(spectrum.wavelength) {
+        color = getRGBfromWavelength(spectrum.wavelength);
+
+        color[0] *= spectrum.intensity;
+        color[1] *= spectrum.intensity;
+        color[2] *= spectrum.intensity;
+    } else {
+        color = spectrum.color;
+    }
+
+    return color;
+}
+
 function emitPhoton() {
 
     let emitter = scene.getEmitter();
     let photon = emitter.material.getPhoton(emitter);
 
     let ray = photon.ray;
-    let color = photon.color;
+    let spectrum = photon.spectrum;
+    let wavelength = spectrum.wavelength; // may be undefined
+    let color = getColorFromEmitterSpectrum(spectrum);
 
-    if(ray.d[1] < -0.95) {
-        let debug = 0;
-    }
 
     let contribution = 1.0;                         // Globals.WORLD_SIZE refers to the vertical size of the world 
     let worldAttenuation = Globals.worldAttenuation * (1.0 / Globals.WORLD_SIZE);
+
 
 
     for(let i = 0; i < LIGHT_BOUNCES; i++) {
@@ -237,10 +313,12 @@ function emitPhoton() {
         // if we had an intersection
         if(result.t) {
 
+
             let object = result.object;
             let material = object.material;
 
-            colorPhoton(ray, result.t /*(result.t - Globals.epsilon)*/, color, contribution, worldAttenuation);
+            if(i >= Globals.skipBounce)
+                colorPhoton(ray, result.t /*(result.t - Globals.epsilon)*/, color, contribution, worldAttenuation);
 
 
             // ***** just used for animation 
@@ -248,10 +326,15 @@ function emitPhoton() {
             // while(Date.now() - cd < 10) { /* do nothing */ }
             // ***** just used for animation - END 
 
-            let scatterResult = object.material.computeScattering(ray, result.normal, result.t, contribution, worldAttenuation);
+            let scatterResult = object.material.computeScattering(ray, result.normal, result.t, contribution, worldAttenuation, wavelength);
             contribution = scatterResult.contribution;
 
-            if(contribution < 0.01) return;
+
+            // if you put a higher value (e.g. 0.01) here's what might happen: 
+            // say you set worldAttenuation to a very high number, consequently, all your light sources were set at a very bright color,
+            // at this point even a small contribution of 0.01 with a light source like: [ 3000, 3000, 3000 ] would be very visible,
+            // but since you clamped it to 0.01 it wont show up at all! beware of this
+            if(contribution < 0.0000000001) return;
         }
     }
 }

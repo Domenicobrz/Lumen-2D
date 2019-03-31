@@ -24,7 +24,7 @@ class BeamEmitterMaterial extends EmitterMaterial {
 
         return {
             ray:   new Ray(point, newDirection),
-            color: this.color
+            spectrum: this.getSpectrum(this.color),
         }
     }
 }

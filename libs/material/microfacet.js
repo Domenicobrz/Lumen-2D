@@ -13,7 +13,7 @@ class MicrofacetMaterial extends Material {
         this.roughness = options.roughness !== undefined ? options.roughness : 0.25;
     }
 
-    computeScattering(ray, input_normal, t, contribution, worldAttenuation) {
+    computeScattering(ray, input_normal, t, contribution, worldAttenuation, wavelength) {
 
         let scatterResult = { };
 

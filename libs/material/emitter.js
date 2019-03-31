@@ -9,16 +9,14 @@ class EmitterMaterial extends Material {
 
         if(!options) options = { };
 
-        options.color        = options.color !== undefined ? options.color : [1,1,1];
-        options.opacity      = options.opacity !== undefined ? options.opacity : 1;
-        options.sampleWeight = options.sampleWeight !== undefined ? options.sampleWeight : 1;
-
-        this.color = options.color;
-        this.opacity = options.opacity;
-        this.sampleWeight = options.sampleWeight;
+        this.color        = options.color !== undefined ? options.color : [1,1,1];
+        this.opacity      = options.opacity !== undefined ? options.opacity : 1;
+        this.sampleWeight = options.sampleWeight !== undefined ? options.sampleWeight : 1;
+        // can be undefined, if it is, the color array will be used to get a sampling power for this lightsource
+        this.samplePower  = options.samplePower;
     }
 
-    computeScattering(ray, input_normal, t, contribution, worldAttenuation) {
+    computeScattering(ray, input_normal, t, contribution, worldAttenuation, wavelength) {
         let scatterResult = { };
 
         // opacity test, if it passes we're going to let the ray pass through the object
@@ -99,6 +97,23 @@ class EmitterMaterial extends Material {
         return { contribution: contribution };
     }
 
+
+    getSpectrum(color) {
+        let spectrum;
+        
+        if(Array.isArray(color)) {
+            spectrum = {
+                color: color
+            }
+        }
+
+        if(typeof color === "function") {
+            spectrum = color();
+        }
+
+        return spectrum;
+    }
+
     getPhoton(geometryObject) {
         let res = geometryObject.getRandomPoint();
         let point = res.p;
@@ -121,9 +136,13 @@ class EmitterMaterial extends Material {
         newDirection[1] = nudy + nvdy;
         vec2.normalize(newDirection, newDirection);
 
+
+
+        let spectrum = this.getSpectrum(this.color);
+
         return {
             ray:   new Ray(point, newDirection),
-            color: this.color
+            spectrum: spectrum
         }
     }
 }

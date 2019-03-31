@@ -1,22 +1,22 @@
-import { Scene } from "./scene.js";
-import { Edge } from "./geometry/Edge.js";
-import { Circle } from "./geometry/Circle.js";
-import { Ray } from "./ray.js";
-import { Pixel } from "./pixel.js";
-import { LambertMaterial } from "./material/lambert.js";
-import { MatteMaterial } from "./material/matte.js";
-import { EmitterMaterial } from "./material/emitter.js";
-import { BeamEmitterMaterial } from "./material/beamEmitter.js";
-import { glMatrix, vec2 } from "./dependencies/gl-matrix-es6.js";
-import { Utils } from "./utils.js";
-import { MicrofacetMaterial } from "./material/microfacet.js";
-import { DielectricMaterial } from "./material/dielectric.js";
+import { Scene } from "../scene.js";
+import { Edge } from "../geometry/Edge.js";
+import { Circle } from "../geometry/Circle.js";
+import { Ray } from "../ray.js";
+import { Pixel } from "../pixel.js";
+import { LambertMaterial } from "../material/lambert.js";
+import { MatteMaterial } from "../material/matte.js";
+import { EmitterMaterial } from "../material/emitter.js";
+import { BeamEmitterMaterial } from "../material/beamEmitter.js";
+import { glMatrix, vec2 } from "../dependencies/gl-matrix-es6.js";
+import { Utils } from "../utils.js";
+import { MicrofacetMaterial } from "../material/microfacet.js";
+import { DielectricMaterial } from "../material/dielectric.js";
 
 
 function createScene(scene, workerData) {
 
     let edgeMaterial = new LambertMaterial({ opacity: 1 });
-    let tbound = 11;
+    let tbound = 16;
     let lbound = 19.5;
     let rbound = 19.5;
     let bbound = 11;
@@ -67,25 +67,23 @@ function createScene(scene, workerData) {
         );
     }
 
-    let edge = new Edge(-5, -3.1, -5, -3.2);
+    let edge = new Edge(-16, -3.1, -16, -3.2);
 
-    scene.add(edge, new EmitterMaterial({ 
-        color: function() {
-            return {
-                wavelength: Math.random() * 360 + 380,
-                intensity: 1.5,
-            }
-        }, 
-        samplePower: 150,
-        // color: [3500, 3500, 3500],
-        beamDirection: [1, 0.3] }));
-
-
-    // scene.add( 
-    //     new Circle(-3, 16, 5.5),
-    //     new EmitterMaterial({ 
-    //         color: [250, 225, 200], 
-    //     }));
+    scene.add(
+        edge, 
+        new BeamEmitterMaterial({ 
+            color: function() {
+                return {
+                    wavelength: Math.random() * 360 + 380,
+                    intensity: 1.5,
+                }
+            }, 
+            // since the Scene class samples lightsources depending on their strenght, we can't know beforehand what's the value inside 
+            // the "color" property since it's a function, so we *have* to specify a sampling value for this light source 
+            samplePower: 150,
+            beamDirection: [1, 0.3] 
+        })
+    );
 }
 
 export { createScene };

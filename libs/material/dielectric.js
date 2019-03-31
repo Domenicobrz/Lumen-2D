@@ -13,9 +13,10 @@ class DielectricMaterial extends Material {
         this.roughness = options.roughness !== undefined ? options.roughness : 0.15;
         this.ior = options.ior !== undefined ? options.ior : 1.4;
         this.transmittance = options.transmittance !== undefined ? options.transmittance : 1;
+        this.dispersion = options.dispersion !== undefined ? options.dispersion : 0;
     }
 
-    computeScattering(ray, input_normal, t, contribution, worldAttenuation) {
+    computeScattering(ray, input_normal, t, contribution, worldAttenuation, wavelength) {
 
         let scatterResult = { };
 
@@ -115,7 +116,7 @@ class DielectricMaterial extends Material {
 
 
         let sigma = this.roughness;
-        let ior = this.ior;
+        let ior = wavelength !== undefined ? this.getIOR(wavelength) : this.ior;
 
         let PI_HALF = Math.PI * 0.5;
         let theta  = Math.asin(Math.min(Math.abs(w_o[0]), 1.0));
@@ -202,6 +203,59 @@ class DielectricMaterial extends Material {
 
 
         return { contribution: contribution };
+    }
+
+
+    getIOR(wavelength) {
+        let iorType = 2;
+
+        if(iorType === 0) {
+
+            let B1 = 3 * 1.03961212;
+            let C1 = 3 * 0.00600069867;
+            let B2 = 3 * 0.231792344;
+            let C2 = 3 * 0.0200179144;
+            let B3 = 3 * 1.01046945;
+            let C3 = 3 * 103.560653;
+            let w2 = (wavelength*0.001) * (wavelength*0.001);
+
+            let ior = Math.sqrt(1 + (B1 * w2) / (w2 - C1) + (B2 * w2) / (w2 - C2) + (B3 * w2) / (w2 - C3));
+            return (ior / 1.4);
+        } else if (iorType === 1) {
+
+            let B1 = 12 * 1.03961212;
+            let C1 = 12 * 0.00600069867;
+            let B2 = 12 * 0.231792344;
+            let C2 = 12 * 0.0200179144;
+            let B3 = 12 * 1.01046945;
+            let C3 = 12 * 103.560653;
+            let w2 = (wavelength*0.001) * (wavelength*0.001);
+
+            return Math.sqrt(1 + (B1 * w2) / (w2 - C1) + (B2 * w2) / (w2 - C2) + (B3 * w2) / (w2 - C3));
+        } else if (iorType === 2) {
+
+            // let t = ((wavelength - 400) / 100) * 2 - 1;
+            let t = ((wavelength - 380) / 360) * 2 - 1;
+            // return (this.ior + t * this.dispersion * Math.pow(Math.random(), 0.5));
+            // return (this.ior + t * this.dispersion * Math.pow(Math.random(), 1));
+            // return (this.ior + t * this.dispersion * Math.pow(Math.random(), 2.0));
+            return (this.ior + t * this.dispersion);
+
+        } else if (iorType === 3) {
+
+            let B1 = 30;
+            let B2 = 2;
+            let B3 = 1;
+
+            let C1 = 0.29;
+            let C2 = 0.49;
+            let C3 = 0.59;
+            let w2 = (wavelength*0.001) * (wavelength*0.001);
+
+            let ii = 1.4;
+
+            return Math.sqrt(1 + (B1 * w2) / (w2 - C1) + (B2 * w2) / (w2 - C2) + (B3 * w2) / (w2 - C3));// / ii;
+        }
     }
 }
 
