@@ -221,7 +221,7 @@ class DielectricMaterial extends Material {
     getIOR(wavelength) {
 
         let iorType = 2;
-        if(this.b1 !== undefined) iorType = 3;  // is Sellmeier's coefficients are provided, use those
+        if(this.b1 !== undefined) iorType = 3;  // if Sellmeier's coefficients are provided, use those
 
         if(iorType === 0) {
 
