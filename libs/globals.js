@@ -12,7 +12,7 @@ var Globals = {
                         // [ -WORLD_SIZE/2 ,  +WORLD_SIZE/2 ]
                         // the specified size is related to the height of the viewport, the width depends on the aspect ratio
     worldAttenuation: 0.2, 
-    LIGHT_BOUNCES: 30,
+    LIGHT_BOUNCES: 40,
     skipBounce: 0,      // skips n bounces before drawing the color value to the screen
 
 

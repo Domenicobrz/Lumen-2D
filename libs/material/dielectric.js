@@ -14,6 +14,7 @@ class DielectricMaterial extends Material {
         this.ior = options.ior !== undefined ? options.ior : 1.4;
         this.transmittance = options.transmittance !== undefined ? options.transmittance : 1;
         this.dispersion = options.dispersion !== undefined ? options.dispersion : 0;
+        this.absorption = options.absorption !== undefined ? options.absorption : 0.1;
     }
 
     setSellmierCoefficients(b1, b2, b3, c1, c2, c3, d) {
@@ -71,7 +72,25 @@ class DielectricMaterial extends Material {
         // Compute contribution BEFORE CHANGING THE RAY.O ARRAY!
         // one of your older bug involved placing those lines AFTER changing the ray.o array
         dot = Math.abs(  vec2.dot(ray.d, input_normal)  );
-        contribution *= dot;
+        // contribution *= dot; 
+
+        /* a dielectric material in Lumen2D needs to specify an absorption value
+           why? Imagine this scenario:
+           two mirror objects reflecting the same beam in the same direction
+           with an infinite number of bounces. 
+           
+           |             |
+           | -->  x  <-- |
+           |             |
+   
+           what's the "fluency" at point x ?
+           It would be "infinite"! if we don't use an absorption coefficient,
+           and we set a very high light-bounce limit (e.g. 400) the light that enters a dielectric poligon
+           would bounce around it (thanks to fresnel reflection) for a lot of times thus increasing its
+           "brightness" on screen, and that could make the dielectric shape look brighter that its lightsource!!
+        */
+
+        contribution *= (1 - this.absorption); 
         contribution *= Math.exp(-t * worldAttenuation);
         
 
@@ -184,7 +203,6 @@ class DielectricMaterial extends Material {
             m[1] = (etaM * wiDotM - cosThetaT) * m[1] - etaM * w_o[1];      
             refracted = true;
         }
-
 
 
         // return m*(dot(w_o, m)*2.0) - w_o;

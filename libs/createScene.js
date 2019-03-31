@@ -41,45 +41,70 @@ function createScene(scene, workerData) {
 
 
 
-    for(let i = 0; i < 3; i++) {
-        let angle1 = (i / 3) * Math.PI * 2;
-        let angle2 = ((i+1) / 3) * Math.PI * 2;
 
-        angle1 += Math.PI / 2;
-        angle2 += Math.PI / 2;
 
-        let radius = 4;
 
-        let tx1 = Math.cos(angle1) * radius;
-        let ty1 = Math.sin(angle1) * radius;
-        let tx2 = Math.cos(angle2) * radius;
-        let ty2 = Math.sin(angle2) * radius;
+    let triangleMaterial =  new DielectricMaterial({
+        opacity: 1,
+        transmittance: 1,
+        ior: 1.9,
+        roughness: 0.000001,
+        dispersion: 0,
+        absorption: 0.1
+    });
 
-        let triangleMaterial =  new DielectricMaterial({
-            opacity: 1,
-            transmittance: 1,
-            ior: 1.4,
-            roughness: 0.15,
-            dispersion: 0.125,
-        });
+    // triangleMaterial.setSellmierCoefficients(
+    //     12 * 1.03961212,
+    //     12 * 0.231792344,
+    //     12 * 1.01046945,
+    //     12 * 0.00600069867,
+    //     12 * 0.0200179144,
+    //     12 * 13.560653,
+    //     1
+    // );
 
-        triangleMaterial.setSellmierCoefficients(
-            19 * 1.03961212,
-            3 * 0.231792344,
-            9 * 1.01046945,
-            29 * 0.00600069867,
-            39 * 0.0200179144,
-            1 * 13.560653,
-            1
-        );
+    // for(let j = 0; j < 210; j++) {
+    //     let xOff = Utils.rand() * 30 - 15;
+    //     let yOff = Utils.rand() * 20 - 10;
 
-        scene.add(
-            new Edge(tx2, ty2, tx1, ty1), 
-            triangleMaterial
-        );
-    }
+    //     let radius = 0.1 + Utils.rand() * 0.5;
+    //     let ai = j * 0.2;
 
-    let edge = new Edge(-16, -3.1, -16, -3.2);
+    //     for(let i = 0; i < 3; i++) {
+    //         let angle1 = (i / 3) * Math.PI * 2;
+    //         let angle2 = ((i+1) / 3) * Math.PI * 2;
+
+    //         angle1 += Math.PI / 2 + ai;
+    //         angle2 += Math.PI / 2 + ai;
+
+
+    //         let tx1 = Math.cos(angle1) * radius;
+    //         let ty1 = Math.sin(angle1) * radius;
+    //         let tx2 = Math.cos(angle2) * radius;
+    //         let ty2 = Math.sin(angle2) * radius;
+
+    //         scene.add(
+    //             new Edge(tx2 + xOff, ty2 + yOff, tx1 + xOff, ty1 + yOff), 
+    //             triangleMaterial
+    //         );
+    //     }
+    // }
+    
+
+    scene.add(
+        new Circle(-2, 0, 4), 
+        triangleMaterial
+    );
+    scene.add(
+        new Circle(2, 0, 4), 
+        triangleMaterial
+    );
+    // for(let i = 0; i < 10; i++)
+    // scene.add( new Circle(10 + i * 0.9, 8, 1), triangleMaterial );
+    // scene.add( new Circle(15.4, 8, 1), triangleMaterial );
+    // scene.add( new Circle(15.8, 8, 1), triangleMaterial );
+
+    let edge = new Edge(-16, -3.1, -16, -9.2);
 
     scene.add(
         edge, 
@@ -87,7 +112,7 @@ function createScene(scene, workerData) {
             color: function() {
 
                 let w = 680;
-                if(Math.random() > 0) w = Math.random() * 360 + 380;
+                if(Utils.rand() > 0) w = Utils.rand() * 360 + 380;
 
                 return {
                     wavelength: w,
@@ -97,9 +122,28 @@ function createScene(scene, workerData) {
             // since the Scene class samples lightsources depending on their strenght, we can't know beforehand what's the value inside 
             // the "color" property (it's a function!) so we *have* to specify a sampling value for this light source 
             samplePower: 150,
-            beamDirection: [1, 0.3] 
+            beamDirection: [0, -1] 
         })
     );
+
+    // scene.add(
+    //     new Circle(-15, 0, 2), 
+    //     new EmitterMaterial({ 
+    //         color: function() {
+
+    //             let w = 680;
+    //             if(Math.random() > 0) w = Math.random() * 360 + 380;
+
+    //             return {
+    //                 wavelength: w,
+    //                 intensity: 1.5,
+    //             }
+    //         }, 
+    //         // since the Scene class samples lightsources depending on their strenght, we can't know beforehand what's the value inside 
+    //         // the "color" property (it's a function!) so we *have* to specify a sampling value for this light source 
+    //         samplePower: 150,
+    //     })
+    // );
 }
 
 export { createScene };
