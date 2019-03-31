@@ -55,37 +55,51 @@ function createScene(scene, workerData) {
         let tx2 = Math.cos(angle2) * radius;
         let ty2 = Math.sin(angle2) * radius;
 
+        let triangleMaterial =  new DielectricMaterial({
+            opacity: 1,
+            transmittance: 1,
+            ior: 1.4,
+            roughness: 0.15,
+            dispersion: 0.125,
+        });
+
+        triangleMaterial.setSellmierCoefficients(
+            9 * 1.03961212,
+            9 * 0.231792344,
+            9 * 1.01046945,
+            9 * 0.00600069867,
+            9 * 0.0200179144,
+            9 * 13.560653,
+            1
+        );
+
         scene.add(
             new Edge(tx2, ty2, tx1, ty1), 
-            new DielectricMaterial({
-                opacity: 1,
-                transmittance: 0.5,
-                ior: 1.4,
-                roughness: 0.15,
-                dispersion: 0.125,
-            })
+            triangleMaterial
         );
     }
 
-    let edge = new Edge(-5, -3.1, -5, -3.2);
+    let edge = new Edge(-16, -3.1, -16, -3.2);
 
-    scene.add(edge, new EmitterMaterial({ 
-        color: function() {
-            return {
-                wavelength: Math.random() * 360 + 380,
-                intensity: 1.5,
-            }
-        }, 
-        samplePower: 150,
-        // color: [3500, 3500, 3500],
-        beamDirection: [1, 0.3] }));
+    scene.add(
+        edge, 
+        new BeamEmitterMaterial({ 
+            color: function() {
 
+                let w = 680;
+                if(Math.random() > 0) w = Math.random() * 360 + 380;
 
-    // scene.add( 
-    //     new Circle(-3, 16, 5.5),
-    //     new EmitterMaterial({ 
-    //         color: [250, 225, 200], 
-    //     }));
+                return {
+                    wavelength: w,
+                    intensity: 1.5,
+                }
+            }, 
+            // since the Scene class samples lightsources depending on their strenght, we can't know beforehand what's the value inside 
+            // the "color" property (it's a function!) so we *have* to specify a sampling value for this light source 
+            samplePower: 150,
+            beamDirection: [1, 0.3] 
+        })
+    );
 }
 
 export { createScene };

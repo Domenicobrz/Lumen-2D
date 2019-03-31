@@ -16,6 +16,18 @@ class DielectricMaterial extends Material {
         this.dispersion = options.dispersion !== undefined ? options.dispersion : 0;
     }
 
+    setSellmierCoefficients(b1, b2, b3, c1, c2, c3, d) {
+        this.b1 = b1;
+        this.b2 = b2;
+        this.b3 = b3;
+
+        this.c1 = c1;
+        this.c2 = c2;
+        this.c3 = c3;
+
+        this.d  = d;
+    }
+
     computeScattering(ray, input_normal, t, contribution, worldAttenuation, wavelength) {
 
         let scatterResult = { };
@@ -207,15 +219,19 @@ class DielectricMaterial extends Material {
 
 
     getIOR(wavelength) {
+
         let iorType = 2;
+        if(this.b1 !== undefined) iorType = 3;  // is Sellmeier's coefficients are provided, use those
 
         if(iorType === 0) {
 
+            /* glass coefficients */
+
             let B1 = 3 * 1.03961212;
-            let C1 = 3 * 0.00600069867;
             let B2 = 3 * 0.231792344;
-            let C2 = 3 * 0.0200179144;
             let B3 = 3 * 1.01046945;
+            let C1 = 3 * 0.00600069867;
+            let C2 = 3 * 0.0200179144;
             let C3 = 3 * 103.560653;
             let w2 = (wavelength*0.001) * (wavelength*0.001);
 
@@ -223,39 +239,38 @@ class DielectricMaterial extends Material {
             return (ior / 1.4);
         } else if (iorType === 1) {
 
+            /* plastic coefficients */
+
             let B1 = 12 * 1.03961212;
-            let C1 = 12 * 0.00600069867;
             let B2 = 12 * 0.231792344;
-            let C2 = 12 * 0.0200179144;
             let B3 = 12 * 1.01046945;
+            let C1 = 12 * 0.00600069867;
+            let C2 = 12 * 0.0200179144;
             let C3 = 12 * 103.560653;
             let w2 = (wavelength*0.001) * (wavelength*0.001);
 
             return Math.sqrt(1 + (B1 * w2) / (w2 - C1) + (B2 * w2) / (w2 - C2) + (B3 * w2) / (w2 - C3));
         } else if (iorType === 2) {
 
-            // let t = ((wavelength - 400) / 100) * 2 - 1;
             let t = ((wavelength - 380) / 360) * 2 - 1;
-            // return (this.ior + t * this.dispersion * Math.pow(Math.random(), 0.5));
             // return (this.ior + t * this.dispersion * Math.pow(Math.random(), 1));
-            // return (this.ior + t * this.dispersion * Math.pow(Math.random(), 2.0));
             return (this.ior + t * this.dispersion);
 
         } else if (iorType === 3) {
-
-            let B1 = 30;
-            let B2 = 2;
-            let B3 = 1;
-
-            let C1 = 0.29;
-            let C2 = 0.49;
-            let C3 = 0.59;
+            let B1 = this.b1;
+            let B2 = this.b2;
+            let B3 = this.b3;
+            let C1 = this.c1;
+            let C2 = this.c2;
+            let C3 = this.c3;
             let w2 = (wavelength*0.001) * (wavelength*0.001);
 
-            let ii = 1.4;
+            let res = Math.sqrt(1 + (B1 * w2) / (w2 - C1) + (B2 * w2) / (w2 - C2) + (B3 * w2) / (w2 - C3));
+            // I've seen this.d being used as the actual index of refraction (e.g. Benedikt Bitterly uses 1.4 as the "this.d" parameter)
+            return res / this.d;
 
-            return Math.sqrt(1 + (B1 * w2) / (w2 - C1) + (B2 * w2) / (w2 - C2) + (B3 * w2) / (w2 - C3));// / ii;
         }
+
     }
 }
 

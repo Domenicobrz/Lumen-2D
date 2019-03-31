@@ -49,6 +49,7 @@ onmessage = e => {
         LIGHT_BOUNCES = Globals.LIGHT_BOUNCES; 
 
 
+
         workerIndex = e.data.workerIndex;
 
 
@@ -326,7 +327,7 @@ function emitPhoton() {
             // while(Date.now() - cd < 10) { /* do nothing */ }
             // ***** just used for animation - END 
 
-            let scatterResult = object.material.computeScattering(ray, result.normal, result.t, contribution, worldAttenuation, wavelength);
+            let scatterResult = material.computeScattering(ray, result.normal, result.t, contribution, worldAttenuation, wavelength);
             contribution = scatterResult.contribution;
 
 

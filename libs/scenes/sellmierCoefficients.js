@@ -16,7 +16,7 @@ import { DielectricMaterial } from "../material/dielectric.js";
 function createScene(scene, workerData) {
 
     let edgeMaterial = new LambertMaterial({ opacity: 1 });
-    let tbound = 16;
+    let tbound = 11;
     let lbound = 19.5;
     let rbound = 19.5;
     let bbound = 11;
@@ -55,15 +55,27 @@ function createScene(scene, workerData) {
         let tx2 = Math.cos(angle2) * radius;
         let ty2 = Math.sin(angle2) * radius;
 
+        let triangleMaterial =  new DielectricMaterial({
+            opacity: 1,
+            transmittance: 1,
+            ior: 1.4,
+            roughness: 0.15,
+            dispersion: 0.125,
+        });
+
+        triangleMaterial.setSellmierCoefficients(
+            9 * 1.03961212,
+            9 * 0.231792344,
+            9 * 1.01046945,
+            9 * 0.00600069867,
+            9 * 0.0200179144,
+            9 * 13.560653,
+            1
+        );
+
         scene.add(
             new Edge(tx2, ty2, tx1, ty1), 
-            new DielectricMaterial({
-                opacity: 1,
-                transmittance: 0.5,
-                ior: 1.4,
-                roughness: 0.15,
-                dispersion: 0.125,
-            })
+            triangleMaterial
         );
     }
 
@@ -73,13 +85,17 @@ function createScene(scene, workerData) {
         edge, 
         new BeamEmitterMaterial({ 
             color: function() {
+
+                let w = 680;
+                if(Math.random() > 0) w = Math.random() * 360 + 380;
+
                 return {
-                    wavelength: Math.random() * 360 + 380,
+                    wavelength: w,
                     intensity: 1.5,
                 }
             }, 
             // since the Scene class samples lightsources depending on their strenght, we can't know beforehand what's the value inside 
-            // the "color" property (it's a function!) so we *have* to specify a sampling value for this light source            
+            // the "color" property (it's a function!) so we *have* to specify a sampling value for this light source 
             samplePower: 150,
             beamDirection: [1, 0.3] 
         })
