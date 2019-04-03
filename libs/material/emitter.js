@@ -23,11 +23,11 @@ class EmitterMaterial extends Material {
         if(Math.random() > this.opacity) {
             
             // Compute contribution BEFORE CHANGING THE RAY.O ARRAY!
-            let dot = Math.abs(  vec2.dot(ray.d, input_normal)  );
-            let absorbtionDifference = 1 - dot;
-            let opacityDot = dot + absorbtionDifference * (1 - this.opacity);
+            // let dot = Math.abs(  vec2.dot(ray.d, input_normal)  );
+            // let absorbtionDifference = 1 - dot;
+            // let opacityDot = dot + absorbtionDifference * (1 - this.opacity);
 
-            contribution *= opacityDot;
+            // contribution *= opacityDot;
             contribution *= Math.exp(-t * worldAttenuation);
 
             
