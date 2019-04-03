@@ -2,7 +2,7 @@ var Globals = {
     epsilon: 0.00005,
 
     // if set to true, uses Float64Arrays, which are 2x slower to work on
-    highPrecision: true,
+    highPrecision: false,
 
 
     RENDER_TYPE_NOISE: true,
@@ -22,7 +22,7 @@ var Globals = {
     },
 
 
-    workersCount: 5,
+    workersCount: 1,
 
 
     // Reinhard tonemapping settings

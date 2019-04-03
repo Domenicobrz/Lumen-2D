@@ -76,8 +76,8 @@ function createScene(scene, workerData) {
 
     let edgesMaterial1 = new LambertMaterial({ opacity: 0.75 });
     let edgesMaterial2 = triangleMaterial;
-    let edgesMaterial3 = new ContributionModifierMaterial({ modifier: -0.9 });
-    let edgesMaterial4 = new ContributionModifierMaterial({ modifier: +0.9 });
+    let edgesMaterial3 = new ContributionModifierMaterial({ modifier: 0.2 });
+    let edgesMaterial4 = new ContributionModifierMaterial({ modifier: 1 / 0.2 });
 
     for(let i = 0; i < 2; i++) {
         let radius = 2;

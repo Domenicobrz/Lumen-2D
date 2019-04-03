@@ -7,6 +7,7 @@ import { Pixel } from "./pixel.js";
 import { glMatrix, vec2 } from "./dependencies/gl-matrix-es6.js";
 import { Utils } from "./utils.js";
 import { createScene } from "./createScene.js";
+import { ContributionModifierMaterial } from "./material/contributionModifier.js";
 
 
 var canvasSize;
@@ -306,8 +307,6 @@ function emitPhoton() {
     let contribution = 1.0;                         // Globals.WORLD_SIZE refers to the vertical size of the world 
     let worldAttenuation = Globals.worldAttenuation * (1.0 / Globals.WORLD_SIZE);
 
-
-
     for(let i = 0; i < LIGHT_BOUNCES; i++) {
         let result = scene.intersect(ray);
         
@@ -317,6 +316,7 @@ function emitPhoton() {
 
             let object = result.object;
             let material = object.material;
+            
 
             if(i >= Globals.skipBounce)
                 colorPhoton(ray, result.t /*(result.t - Globals.epsilon)*/, color, contribution, worldAttenuation);

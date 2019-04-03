@@ -8,6 +8,12 @@ class ContributionModifierMaterial extends Material {
 
         if(!options) options = { };
 
+        // the modifier needs to be a multiplicative value, because we can't 
+        // "restore" contribution prior to a subtraction
+        // here's why:  suppose the current contribution is 0.1, and modifier is a negative 0.3 value
+        // you would subtract only 0.1 to prevent the contribution from being negative (negative contributions are skipped in worker.js 
+        // for performance reasons) but when light exits the object, you would add 0.3! gaining a net 0.2 increase in contribution
+        // this problem doesn't occur with muliplicative modifiers
         this.modifier = options.modifier !== undefined ? options.modifier : 0;
     }
 
@@ -19,9 +25,11 @@ class ContributionModifierMaterial extends Material {
         let dot = vec2.dot(ray.d, input_normal);
         
         if (dot < 0) { // light is entering the surface
-            contribution += this.modifier;      
+            contribution *= this.modifier;      
+
         } else {       // light is exiting the surface, restore original contribution
-            contribution -= this.modifier;            
+            // restore contribution previous to hitting this object
+            contribution *= (1 / this.modifier);    
         }
 
         contribution *= Math.exp(-t * worldAttenuation);
