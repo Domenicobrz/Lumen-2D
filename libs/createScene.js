@@ -11,6 +11,7 @@ import { glMatrix, vec2 } from "./dependencies/gl-matrix-es6.js";
 import { Utils } from "./utils.js";
 import { MicrofacetMaterial } from "./material/microfacet.js";
 import { DielectricMaterial } from "./material/dielectric.js";
+import { ContributionModifierMaterial } from "./material/contributionModifier.js";
 import { quickNoise } from "./dependencies/quick-noise.js";
 
 
@@ -49,8 +50,17 @@ function createScene(scene, workerData) {
         opacity: 1,
         transmittance: 1,
         ior: 1.4,
-        roughness: 0.000004,
-        dispersion: 0.05,
+        roughness: 0.14,
+        dispersion: 0.15,
+        absorption: 0.45
+    });
+
+    let triangleMaterial2 =  new DielectricMaterial({
+        opacity: 0.8,
+        transmittance: 1,
+        ior: 1.4,
+        roughness: 0.14,
+        dispersion: 0.15,
         absorption: 0.45
     });
 
@@ -64,136 +74,129 @@ function createScene(scene, workerData) {
     //     1
     // );
 
-    let sides = 5;
-    for(let j = 0; j < 1; j++) {
-        let xOff = 0; // Utils.rand() * 30 - 15;
-        let yOff = 0; // Utils.rand() * 20 - 10;
+    let edgesMaterial1 = new LambertMaterial({ opacity: 0.75 });
+    let edgesMaterial2 = triangleMaterial;
+    let edgesMaterial3 = new ContributionModifierMaterial({ modifier: -0.9 });
+    let edgesMaterial4 = new ContributionModifierMaterial({ modifier: +0.9 });
 
-        let radius = 5;
-        // let ai = j * 0.2;
+    for(let i = 0; i < 2; i++) {
+        let radius = 2;
+        if(i === 1) radius = 1;
 
-        for(let i = 0; i < sides; i++) {
-            let angle1 = (i / sides) * Math.PI * 2;
-            let angle2 = ((i+1) / sides) * Math.PI * 2;
+        let xt = 5;
+        let yt = 5;
 
-            angle1 += Math.PI / 2;
-            angle2 += Math.PI / 2;
+        let xo = Utils.rand() * 0.5 - 0.25; 
+        let yo = Utils.rand() * 0.5 - 0.25;
+
+        for(let j = 0; j < 1; j++) {
+            let x1 = -1;    
+            let y1 = -1;    
+
+            let x2 = -1;    
+            let y2 = +1;
+
+            let x4 = +1;    
+            let y4 = -1;
+
+            let x3 = +1;    
+            let y3 = +1;
+
+            x1 *= radius;
+            y1 *= radius;
+            x2 *= radius;
+            y2 *= radius;
+            x3 *= radius;
+            y3 *= radius;
+            x4 *= radius;
+            y4 *= radius;
+
+            let xOff = xo * j;
+            let yOff = yo * j;
 
 
-            // let tx1 = Math.cos(angle1) * radius;
-            // let ty1 = Math.sin(angle1) * radius;
-            // let tx2 = Math.cos(angle2) * radius;
-            // let ty2 = Math.sin(angle2) * radius;
+
+            // let ix = i % 3  - 1;
+            // let iy = Math.floor(i / 3) - 1;
+            let ix = 0;
+            let iy = 0;
+
+            xOff += xt * ix;
+            yOff += yt * iy;
 
 
-            for(let i = 0; i < 100; i++) {
-                radius += quickNoise.noise(i * 0.2, i * 0.2, i * 0.2) * 0.2;
+            x1 += xOff;
+            x2 += xOff;
+            x3 += xOff;
+            x4 += xOff;
+            y1 += yOff;
+            y2 += yOff;
+            y3 += yOff;
+            y4 += yOff;
 
-                let tx1 = Math.cos(angle1) * radius;
-                let ty1 = Math.sin(angle1) * radius;
-                let tx2 = Math.cos(angle2) * radius;
-                let ty2 = Math.sin(angle2) * radius;
+            let blur = 0;
+            let edgesMaterial = edgesMaterial3;
+            if(i === 1) edgesMaterial = edgesMaterial4;
 
+            scene.add(new Edge(x1, y1, x2, y2, blur), edgesMaterial);
+            scene.add(new Edge(x2, y2, x3, y3, blur), edgesMaterial);
+            scene.add(new Edge(x3, y3, x4, y4, blur), edgesMaterial);
+            scene.add(new Edge(x4, y4, x1, y1, blur), edgesMaterial);
 
-                let t1 = (i / 99);
-                let t2 = ((i+1) / 99);
-                let dx = tx2-tx1;
-                let dy = ty2-ty1;
-
-                scene.add(
-                    new Edge(
-                        /*tx2 + */ tx1 + dx * t1 + xOff, 
-                        /*ty2 + */ ty1 + dy * t1 + yOff, 
-                        /*tx1 + */ tx1 + dx * t2 + xOff, 
-                        /*ty1 + */ ty1 + dy * t2 + yOff), 
-                    new LambertMaterial({opacity: 0.92})
-                    // triangleMaterial,
-                );
-            }
+            radius *= 0.7;
         }
     }
     
-    scene.add(
-        new Circle(0,0, 7), 
-        triangleMaterial,
-    );
-
-    // let rad = 3.25;
-    // let pradius1 = rad;
-    // let pradius2 = rad;
-    // let offy = -0.5;
-    // for (let i = 0; i < 300; i++) {
-    //     let angle1 = (i / 300) * Math.PI * 2;
-    //     let angle2 = ((i+1) / 300) * Math.PI * 2;
-    
-    //     angle1 += Math.PI / 2;
-    //     angle2 += Math.PI / 2;
-    
-    //     let radius1 = pradius2;
-    //     let radius2 = pradius2 + quickNoise.noise(i * 0.25, i * 0.283, i * 0.2) * 0.45;
-    //     if(i === 299) radius2 = rad;
-
-    //     let tx1 = Math.cos(angle1) * radius1;
-    //     let ty1 = Math.sin(angle1) * radius1;
-    //     let tx2 = Math.cos(angle2) * radius2;
-    //     let ty2 = Math.sin(angle2) * radius2;
-    
-    //     scene.add(
-    //         new Edge(tx2, ty2 + offy, tx1, ty1 + offy), 
-    //         triangleMaterial
-    //         // new LambertMaterial({opacity: 0.85})
-    //     );
-
-    //     pradius2 = radius2;
-    // }
-
 
   
     let y = 1;
     // let edge = new Edge(-7, y, -7, y-0.1);
-    let edge = new Edge(-17, 9, -16.9, 9);
+    // let edge = new Edge(1.7, 9, 1.6, 9);
+    // let edge2 = new Edge(-1.6, -9, -1.5, -9);
 
+    // let elm = 9;
     // let lightMaterial = new BeamEmitterMaterial({ 
-    //     color: function() {
+    //     // color: function() {
 
-    //         let w = 680;
-    //         if(Utils.rand() > 0) w = Utils.rand() * 360 + 380;
+    //     //     let w = 680;
+    //     //     if(Utils.rand() > 0) w = Utils.rand() * 360 + 380;
 
-    //         return {
-    //             wavelength: w,
-    //             intensity: 2.5,
-    //         }
-    //     }, 
-    //     opacity: 0,
-    //     // since the Scene class samples lightsources depending on their strenght, we can't know beforehand what's the value inside 
-    //     // the "color" property (it's a function!) so we *have* to specify a sampling value for this light source 
-    //     samplePower: 150,
-    //     // beamDirection: [1, 0] 
-    //     beamDirection: [0, -1] 
+    //     //     return {
+    //     //         wavelength: w,
+    //     //         intensity: 20.5,
+    //     //     }
+    //     // }, 
+    //     // opacity: 0,
+    //     // // since the Scene class samples lightsources depending on their strenght, we can't know beforehand what's the value inside 
+    //     // // the "color" property (it's a function!) so we *have* to specify a sampling value for this light source 
+    //     // samplePower: 150,
+    //     // // beamDirection: [1, 0] 
+    //     color: [400 * elm, 900 * elm, 2500 * elm],
+    //     beamDirection: [1.85, -1] 
     // });
-
+    // let lightMaterial2 = new BeamEmitterMaterial({ 
+    //     // samplePower: 150,      
+    //     color: [2500 * elm, 900 * elm, 400 * elm],
+    //     beamDirection: [-1.85, 1] 
+    // });
     // scene.add(edge, lightMaterial);
-    // scene.add(edge2, lightMaterial);
+    // scene.add(edge2, lightMaterial2);
 
     scene.add(
-        new Circle(-21, 0, 3), 
+        new Circle(16, 7.5, 3), 
         new EmitterMaterial({ 
             opacity: 0,
-            color: function() {
-
-                let w = 680;
-                if(Math.random() > 0) w = Math.random() * 360 + 380;
-
-                return {
-                    wavelength: w,
-                    intensity: 10.5,
-                }
-            }, 
-            // since the Scene class samples lightsources depending on their strenght, we can't know beforehand what's the value inside 
-            // the "color" property (it's a function!) so we *have* to specify a sampling value for this light source 
-            samplePower: 150,
+            color: [40, 90, 250]
         })
     );
+
+    // scene.add(
+    //     new Circle(-16, 7.5, 3), 
+    //     new EmitterMaterial({ 
+    //         opacity: 0,
+    //         color: [250, 90, 40]
+    //     })
+    // );
 }
 
 export { createScene };

@@ -2,7 +2,7 @@ var Globals = {
     epsilon: 0.00005,
 
     // if set to true, uses Float64Arrays, which are 2x slower to work on
-    highPrecision: false,
+    highPrecision: true,
 
 
     RENDER_TYPE_NOISE: true,
@@ -12,7 +12,7 @@ var Globals = {
                         // [ -WORLD_SIZE/2 ,  +WORLD_SIZE/2 ]
                         // the specified size is related to the height of the viewport, the width depends on the aspect ratio
     worldAttenuation: 0.2, 
-    LIGHT_BOUNCES: 30,
+    LIGHT_BOUNCES: 25,
     skipBounce: 0,      // skips n bounces before drawing the color value to the screen
 
 

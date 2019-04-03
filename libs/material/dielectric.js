@@ -36,19 +36,12 @@ class DielectricMaterial extends Material {
         // opacity test, if it passes we're going to let the ray pass through the object
         if(Math.random() > this.opacity) {
 
-            // Compute contribution BEFORE CHANGING THE RAY.O ARRAY!
-            let dot = Math.abs(  vec2.dot(ray.d, input_normal)  );
-            let absorbtionDifference = 1 - dot;
-            let opacityDot = dot + absorbtionDifference * (1 - this.opacity);
-
-            contribution *= opacityDot;
             contribution *= Math.exp(-t * worldAttenuation);
 
 
             let newOrigin = vec2.create();
             vec2.scaleAndAdd(newOrigin, ray.o, ray.d, t + Globals.epsilon); // it's important that the epsilon value is subtracted/added instead of doing t * 0.999999 since that caused floating point precision issues
             vec2.copy(ray.o, newOrigin);
-
             
             
             scatterResult.contribution = contribution;
