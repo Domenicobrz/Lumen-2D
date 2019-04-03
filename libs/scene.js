@@ -14,6 +14,13 @@ class Scene {
         this.args = args;
     }
 
+    reset() {
+        this._emittersCdfArray = [];
+        this._emittersCdfMax   = 0;
+        this._objects          = [];
+        this._bvh              = undefined;
+    }
+
     add(object, material) {
         object.material = material || new MatteMaterial();
         this._objects.push(object);

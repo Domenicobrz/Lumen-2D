@@ -12,6 +12,7 @@ import { ContributionModifierMaterial } from "./material/contributionModifier.js
 
 var canvasSize;
 var scene;
+var sceneArgs;
 var pixelBuffer = [];
 // var vec2 = glMatrix.vec2;
 var coloredPixels = 0;
@@ -20,6 +21,7 @@ var frameSkipperCount = 0;
 var sharedArray;
 var sharedArray2;
 
+var workerDataReference;
 var workerIndex;
 
 var WORLD_SIZE = {
@@ -29,6 +31,7 @@ var WORLD_SIZE = {
 var LIGHT_BOUNCES; 
 
 var Globals;
+var motionBlurPhotonsCount = 0;
 
 onmessage = e => {
 
@@ -50,16 +53,18 @@ onmessage = e => {
         LIGHT_BOUNCES = Globals.LIGHT_BOUNCES; 
 
 
-
+        workerDataReference = e.data;
         workerIndex = e.data.workerIndex;
 
 
-        scene = new Scene({
+        // we need a reference to this object since it will be used again inside the renderSample function
+        sceneArgs = {
             showBVHdebug: workerIndex === 0 ? true : false,
-        });
+        };
+        scene = new Scene(sceneArgs);
 
 
-        createScene(scene, e.data);
+        createScene(scene, e.data, Math.random());
       
 
         requestAnimationFrame(renderSample);
@@ -76,7 +81,7 @@ function renderSample() {
     requestAnimationFrame(renderSample);
 
 
-    // // also make sure to reset this
+    // also make sure to reset this
     coloredPixels = 0;
 
     let photonCount = Globals.PHOTONS_PER_FRAME;
@@ -85,7 +90,25 @@ function renderSample() {
     for(let i = 0; i < photonCount; i++) {
         emitPhoton();
         sharedArray2[workerIndex] += 1;
+
+
+
+        // ********** Motion blur logic 
+        motionBlurPhotonsCount += 1;
+        if(Globals.motionBlur && (motionBlurPhotonsCount >= Globals.motionBlurFramePhotons)) {
+            sceneArgs.showBVHdebug = false;
+            scene.args = sceneArgs;
+            scene.reset();
+            createScene(scene, workerDataReference, Math.random());
+            motionBlurPhotonsCount = 0;
+        }
+        // ********** Motion blur logic - END
+
     }
+
+
+    
+
 
     postMessage({
         photonsFired: Globals.PHOTONS_PER_FRAME,

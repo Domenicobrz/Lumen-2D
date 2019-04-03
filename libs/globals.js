@@ -16,6 +16,12 @@ var Globals = {
     skipBounce: 0,      // skips n bounces before drawing the color value to the screen
 
 
+
+    motionBlur: false,
+    motionBlurFramePhotons: 5000, 
+
+
+
     canvasSize: { 
         width:  1910,
         height: 995,

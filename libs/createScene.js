@@ -15,7 +15,7 @@ import { ContributionModifierMaterial } from "./material/contributionModifier.js
 import { quickNoise } from "./dependencies/quick-noise.js";
 
 
-function createScene(scene, workerData) {
+function createScene(scene, workerData, motionBlurT) {
 
     let edgeMaterial = new LambertMaterial({ opacity: 1 });
     let tbound = 11;
@@ -35,9 +35,8 @@ function createScene(scene, workerData) {
 
 
 
-    // Utils.setSeed("juice921");
-    let seed = Math.floor(workerData.randomNumber * 1000000000);
-    console.log(seed);
+    let seed = "juice921"; //Math.floor(workerData.randomNumber * 1000000000);
+    // console.log(seed);
     Utils.setSeed(seed);
     let rand = Utils.rand;
 
@@ -64,15 +63,6 @@ function createScene(scene, workerData) {
         absorption: 0.35
     });
 
-    // triangleMaterial.setSellmierCoefficients(
-    //     12 * 1.03961212,
-    //     12 * 0.231792344,
-    //     12 * 1.01046945,
-    //     12 * 0.00600069867,
-    //     12 * 0.0200179144,
-    //     12 * 13.560653,
-    //     1
-    // );
 
     let edgesMaterial1 = new LambertMaterial({ opacity: 0.25 });
     let edgesMaterial2 = triangleMaterial2;
@@ -121,8 +111,23 @@ function createScene(scene, workerData) {
             // let ix = 0;
             // let iy = 0;
 
+
+
             xOff += xt * ix;
             yOff += yt * iy;
+
+            if(i === 5) {
+                xOff += 2 * motionBlurT;                
+            }
+            if(i === 3) {
+                xOff -= 2 * motionBlurT;                
+            }
+            if(i === 1) {
+                yOff -= 2 * motionBlurT;                
+            }
+            if(i === 7) {
+                yOff += 2 * motionBlurT;                
+            }
 
 
             x1 += xOff;
@@ -137,7 +142,11 @@ function createScene(scene, workerData) {
             let blur = 0;
             let edgesMaterial = edgesMaterial3;
             if(((i * 9) + j) % 2 === 1) edgesMaterial = edgesMaterial4;
+            // if(i === 1) blur = 0.15;
             if(i === 4) edgesMaterial = edgesMaterial2;
+
+
+          
 
             scene.add(new Edge(x1, y1, x2, y2, blur), edgesMaterial);
             scene.add(new Edge(x2, y2, x3, y3, blur), edgesMaterial);
