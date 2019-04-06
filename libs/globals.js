@@ -1,7 +1,7 @@
 var Globals = {
     epsilon: 0.00005,
 
-    // if set to true, uses Float64Arrays, which are 2x slower to work on
+    // if set to true, uses Float64Arrays, which are 2x slower to work with
     highPrecision: false,
 
 
@@ -22,6 +22,8 @@ var Globals = {
 
 
 
+    // enabling it will slow down render times by about 1.8x
+    deactivateOffscreenCanvas: true,
     offscreenCanvasCPow: 2,
 
 
@@ -38,7 +40,7 @@ var Globals = {
     // Reinhard tonemapping settings
     toneMapping: true,
     gamma: 2.2,
-    exposure: 1,
+    exposure: 3,
     // Reinhard tonemapping settings - END
 }
 

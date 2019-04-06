@@ -22,7 +22,7 @@ function createScene(scene, workerData, motionBlurT, ctx) {
         color: 
         function() { return {
             wavelength: Math.random() * 310 + 380,
-            intensity: 4.5,
+            intensity: 1.5,
         }  
     }, samplePower: 1 });
     let edgeMaterial2 = new LambertMaterial({ opacity: 1 });
@@ -89,7 +89,7 @@ function createScene(scene, workerData, motionBlurT, ctx) {
     scene.add(
         new Circle(0, 0, 5), 
         new LambertMaterial({ 
-            opacity: 0.95,
+            opacity: 0.85,
         })
         // triangleMaterial,
     );

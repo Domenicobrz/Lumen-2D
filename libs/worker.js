@@ -261,16 +261,24 @@ function colorPhoton(ray, t, emitterColor, contribution, worldAttenuation) {
                 let cindex = (py * canvasSize.width + px) * 4;
 
 
-                let ocr = (offscreenCanvasPixels[cindex + 0] * offscreenPixelNormalizationFactor) * 2 - 1;
-                let ocg = (offscreenCanvasPixels[cindex + 1] * offscreenPixelNormalizationFactor) * 2 - 1;
-                let ocb = (offscreenCanvasPixels[cindex + 2] * offscreenPixelNormalizationFactor) * 2 - 1;
-               
-                // at this point ocr, ocg, ogb are in the range [-1 ... +1]
-                // offscreenCanvasCPow decides how "strong" the drawing effect is,
-                // by using an exponential function that extends the original  -1 ... +1 range
-                ocr = Math.exp(ocr * Globals.offscreenCanvasCPow);
-                ocg = Math.exp(ocg * Globals.offscreenCanvasCPow);
-                ocb = Math.exp(ocb * Globals.offscreenCanvasCPow);
+
+                let ocr = 1;
+                let ocg = 1;
+                let ocb = 1;
+
+                if(!Globals.deactivateOffscreenCanvas) {
+                    ocr = (offscreenCanvasPixels[cindex + 0] * offscreenPixelNormalizationFactor) * 2 - 1;
+                    ocg = (offscreenCanvasPixels[cindex + 1] * offscreenPixelNormalizationFactor) * 2 - 1;
+                    ocb = (offscreenCanvasPixels[cindex + 2] * offscreenPixelNormalizationFactor) * 2 - 1;
+                    
+                    // at this point ocr, ocg, ogb are in the range [-1 ... +1]
+                    // offscreenCanvasCPow decides how "strong" the drawing effect is,
+                    // by using an exponential function that extends the original  -1 ... +1 range
+                    ocr = Math.exp(ocr * Globals.offscreenCanvasCPow);
+                    ocg = Math.exp(ocg * Globals.offscreenCanvasCPow);
+                    ocb = Math.exp(ocb * Globals.offscreenCanvasCPow);
+                }
+
 
 
                 let prevR = sharedArray[index + 0];
