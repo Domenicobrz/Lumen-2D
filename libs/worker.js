@@ -33,6 +33,11 @@ var LIGHT_BOUNCES;
 var Globals;
 var motionBlurPhotonsCount = 0;
 
+var offcanvas;
+var offscreenCanvasCtx;
+var offscreenCanvasPixels;
+var offscreenPixelNormalizationFactor = 1 / 255;
+
 onmessage = e => {
 
     if(e.data.type == "start") {
@@ -64,8 +69,11 @@ onmessage = e => {
         scene = new Scene(sceneArgs);
 
 
-        createScene(scene, e.data, Math.random());
-      
+
+        initOffscreenCanvas();
+        createScene(scene, e.data, Math.random(), offscreenCanvasCtx);
+        // get data written to canvas
+        offscreenCanvasPixels = offscreenCanvasCtx.getImageData(0, 0, offcanvas.width, offcanvas.height).data;
 
         requestAnimationFrame(renderSample);
     }
@@ -75,6 +83,36 @@ onmessage = e => {
     }
 };
 
+
+function initOffscreenCanvas() {
+    offcanvas = new OffscreenCanvas(Globals.canvasSize.width, Globals.canvasSize.height);
+    offscreenCanvasCtx = offcanvas.getContext("2d");
+
+    let verticalScale = Globals.canvasSize.height / WORLD_SIZE.h;
+    
+    offscreenCanvasCtx.translate(Globals.canvasSize.width / 2, Globals.canvasSize.height / 2);
+    offscreenCanvasCtx.scale(verticalScale, verticalScale);
+
+    offscreenCanvasCtx.fillStyle = "rgb(255,255,255)";
+    offscreenCanvasCtx.fillRect(
+        -WORLD_SIZE.w / 2 - 1, // -1 and +2 are added to make sure the edges are fully covered
+        -WORLD_SIZE.h / 2 - 1, 
+        +WORLD_SIZE.w + 2, 
+        +WORLD_SIZE.h + 2);
+
+    offscreenCanvasCtx.save();
+}
+
+function resetCanvasState() {
+    offscreenCanvasCtx.fillStyle = "rgb(255,255,255)";
+    offscreenCanvasCtx.fillRect(
+        -WORLD_SIZE.w / 2 - 1, // -1 and +2 are added to make sure the edges are fully covered
+        -WORLD_SIZE.h / 2 - 1, 
+        +WORLD_SIZE.w + 2, 
+        +WORLD_SIZE.h + 2);
+
+    offscreenCanvasCtx.restore();
+}
 
 
 function renderSample() {
@@ -99,11 +137,12 @@ function renderSample() {
             sceneArgs.showBVHdebug = false;
             scene.args = sceneArgs;
             scene.reset();
-            createScene(scene, workerDataReference, Math.random());
+            resetCanvasState();
+            createScene(scene, workerDataReference, Math.random(), offscreenCanvasCtx);
+            offscreenCanvasPixels = offscreenCanvasCtx.getImageData(0, 0, offcanvas.width, offcanvas.height).data;        
             motionBlurPhotonsCount = 0;
         }
         // ********** Motion blur logic - END
-
     }
 
 
@@ -218,21 +257,28 @@ function colorPhoton(ray, t, emitterColor, contribution, worldAttenuation) {
                 previousPixel[0] = px;
                 previousPixel[1] = py;
     
-                let index = (py * canvasSize.width + px) * 3;
+                let index  = (py * canvasSize.width + px) * 3;
+                let cindex = (py * canvasSize.width + px) * 4;
 
-                // let prevR = Atomics.load(sharedArray, index + 0);
-                // let prevG = Atomics.load(sharedArray, index + 1);
-                // let prevB = Atomics.load(sharedArray, index + 2);
-                // Atomics.store(sharedArray, index + 0, prevR + emitterColor[0] * SAMPLES_STRENGHT * contribution * attenuation);
-                // Atomics.store(sharedArray, index + 1, prevG + emitterColor[1] * SAMPLES_STRENGHT * contribution * attenuation);
-                // Atomics.store(sharedArray, index + 2, prevB + emitterColor[2] * SAMPLES_STRENGHT * contribution * attenuation);
+
+                let ocr = (offscreenCanvasPixels[cindex + 0] * offscreenPixelNormalizationFactor) * 2 - 1;
+                let ocg = (offscreenCanvasPixels[cindex + 1] * offscreenPixelNormalizationFactor) * 2 - 1;
+                let ocb = (offscreenCanvasPixels[cindex + 2] * offscreenPixelNormalizationFactor) * 2 - 1;
+               
+                // at this point ocr, ocg, ogb are in the range [-1 ... +1]
+                // offscreenCanvasCPow decides how "strong" the drawing effect is,
+                // by using an exponential function that extends the original  -1 ... +1 range
+                ocr = Math.exp(ocr * Globals.offscreenCanvasCPow);
+                ocg = Math.exp(ocg * Globals.offscreenCanvasCPow);
+                ocb = Math.exp(ocb * Globals.offscreenCanvasCPow);
+
 
                 let prevR = sharedArray[index + 0];
                 let prevG = sharedArray[index + 1];
                 let prevB = sharedArray[index + 2];
-                sharedArray[index + 0] = prevR + emitterColor[0] * SAMPLES_STRENGHT * contribution * attenuation * stepAttenuation;
-                sharedArray[index + 1] = prevG + emitterColor[1] * SAMPLES_STRENGHT * contribution * attenuation * stepAttenuation;
-                sharedArray[index + 2] = prevB + emitterColor[2] * SAMPLES_STRENGHT * contribution * attenuation * stepAttenuation;
+                sharedArray[index + 0] = prevR + emitterColor[0] * SAMPLES_STRENGHT * contribution * attenuation * stepAttenuation * ocr;
+                sharedArray[index + 1] = prevG + emitterColor[1] * SAMPLES_STRENGHT * contribution * attenuation * stepAttenuation * ocg;
+                sharedArray[index + 2] = prevB + emitterColor[2] * SAMPLES_STRENGHT * contribution * attenuation * stepAttenuation * ocb;
             }
         }
 

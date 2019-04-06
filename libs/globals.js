@@ -22,6 +22,10 @@ var Globals = {
 
 
 
+    offscreenCanvasCPow: 2,
+
+
+
     canvasSize: { 
         width:  1910,
         height: 995,

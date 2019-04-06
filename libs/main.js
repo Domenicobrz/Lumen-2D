@@ -169,7 +169,7 @@ function renderSample() {
     for (var i = 0; i < canvasSize.width * canvasSize.height * 4; i += 4)
     {
         let pixelIndex = Math.floor(i / 4);
-        let y = canvasSize.height - Math.floor(pixelIndex / canvasSize.width) - 1;
+        let y = canvasSize.height - 1 - Math.floor(pixelIndex / canvasSize.width);
         let x = pixelIndex % canvasSize.width;
 
         let index = (y * canvasSize.width + x) * 3;
@@ -209,7 +209,7 @@ function renderSample() {
         if(g > 255) g = 255;
         if(b > 255) b = 255;
 
-        imageData[i]     = r;
+        imageData[i + 0] = r;
         imageData[i + 1] = g;
         imageData[i + 2] = b;
         imageData[i + 3] = 255;
