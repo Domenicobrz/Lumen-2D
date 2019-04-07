@@ -76,7 +76,6 @@ function createScene(scene, workerData, motionBlurT, ctx) {
 
 
 
-
     let triangleMaterial =  new DielectricMaterial({
         opacity: 1,
         transmittance: 1,

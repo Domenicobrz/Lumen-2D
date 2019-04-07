@@ -7,6 +7,7 @@ var Globals = {
 
     RENDER_TYPE_NOISE: true,
     PHOTONS_PER_FRAME: 10000,
+    USE_STRATIFIED_SAMPLING: true,
 
     WORLD_SIZE: 20,     // effectively means the horizontal extent will be
                         // [ -WORLD_SIZE/2 ,  +WORLD_SIZE/2 ]
@@ -19,6 +20,14 @@ var Globals = {
 
     motionBlur: false,
     motionBlurFramePhotons: 5000, 
+
+
+
+
+
+
+    // see if it's possible to update the contribution of the canvas pixels
+    // all at once without having to do it for each pixel
 
 
 

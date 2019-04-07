@@ -30,6 +30,8 @@ var WORLD_SIZE = {
 };  
 var LIGHT_BOUNCES; 
 
+var USE_STRATIFIED_SAMPLING = false;
+
 var Globals;
 var motionBlurPhotonsCount = 0;
 
@@ -56,7 +58,7 @@ onmessage = e => {
         WORLD_SIZE.h = Globals.WORLD_SIZE;  
         WORLD_SIZE.w = Globals.WORLD_SIZE * (canvasSize.width / canvasSize.height);  
         LIGHT_BOUNCES = Globals.LIGHT_BOUNCES; 
-
+        USE_STRATIFIED_SAMPLING = Globals.USE_STRATIFIED_SAMPLING;
 
         workerDataReference = e.data;
         workerIndex = e.data.workerIndex;
@@ -155,7 +157,6 @@ function renderSample() {
     });
 }
 
-
 function colorPhoton(ray, t, emitterColor, contribution, worldAttenuation) {
     let worldPixelSize = WORLD_SIZE.h / canvasSize.height;
     let step = worldPixelSize;
@@ -238,8 +239,17 @@ function colorPhoton(ray, t, emitterColor, contribution, worldAttenuation) {
         let SAMPLES_STRENGHT = continuousSteps / SAMPLES; // think of it this way: if we should have sampled 30 pixels (with the line sampling method), but instead we're just 
                                                           // coloring two, then these two pixels need 15x times the amount of radiance
     
+        let sample_step = t / SAMPLES;
         for(let i = 0; i < SAMPLES; i++) {
-            let tt = t * Math.random();
+
+            let tt;
+            if(USE_STRATIFIED_SAMPLING) {
+                tt = sample_step * i;
+                tt += sample_step * Math.random();    
+            } else {
+                tt = t * Math.random();
+            }
+
             vec2.scaleAndAdd(worldPoint, ray.o, ray.d, tt);
     
             // convert world point to pixel coordinate
@@ -284,9 +294,12 @@ function colorPhoton(ray, t, emitterColor, contribution, worldAttenuation) {
                 let prevR = sharedArray[index + 0];
                 let prevG = sharedArray[index + 1];
                 let prevB = sharedArray[index + 2];
-                sharedArray[index + 0] = prevR + emitterColor[0] * SAMPLES_STRENGHT * contribution * attenuation * stepAttenuation * ocr;
-                sharedArray[index + 1] = prevG + emitterColor[1] * SAMPLES_STRENGHT * contribution * attenuation * stepAttenuation * ocg;
-                sharedArray[index + 2] = prevB + emitterColor[2] * SAMPLES_STRENGHT * contribution * attenuation * stepAttenuation * ocb;
+
+                let ss = SAMPLES_STRENGHT * contribution * attenuation * stepAttenuation;
+
+                sharedArray[index + 0] = prevR + emitterColor[0] * ss * ocr;
+                sharedArray[index + 1] = prevG + emitterColor[1] * ss * ocg;
+                sharedArray[index + 2] = prevB + emitterColor[2] * ss * ocb;
             }
         }
 
