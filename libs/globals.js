@@ -8,6 +8,15 @@ var Globals = {
     RENDER_TYPE_NOISE: true,
     PHOTONS_PER_FRAME: 10000,
     USE_STRATIFIED_SAMPLING: true,
+    // variable determining how many samples are drawn from a line
+    // eg. if a light ray is "200 pixels long" the amount of pixels actually drawn
+    // would be     floor(light_ray_pixel_length * samplingRatioPerPixelCovered);
+    // range: [0...1]
+    // values towards one will draw more samples per line, so expect more pixels drawn but
+    // a lower number of photons fired
+    // values towards zero will draw less samples per line, so expect less pixels drawn but
+    // a bigger number of photons fired
+    samplingRatioPerPixelCovered: 0.04,
 
     WORLD_SIZE: 20,     // effectively means the horizontal extent will be
                         // [ -WORLD_SIZE/2 ,  +WORLD_SIZE/2 ]
@@ -18,10 +27,9 @@ var Globals = {
 
 
 
+
     motionBlur: false,
     motionBlurFramePhotons: 5000, 
-
-
 
 
 
@@ -31,8 +39,8 @@ var Globals = {
 
 
 
-    // enabling it will slow down render times by about 1.8x
-    deactivateOffscreenCanvas: true,
+    // activating an oc canvas slows down render times by about 1.8x
+    deactivateOffscreenCanvas: false,
     offscreenCanvasCPow: 2,
 
 
@@ -49,7 +57,7 @@ var Globals = {
     // Reinhard tonemapping settings
     toneMapping: true,
     gamma: 2.2,
-    exposure: 3,
+    exposure: 1,
     // Reinhard tonemapping settings - END
 }
 

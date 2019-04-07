@@ -52,21 +52,24 @@ function createScene(scene, workerData, motionBlurT, ctx) {
 
 
 
-    ctx.fillStyle = "rgb(127,127,127)";
-    ctx.fillRect(-100, -100, 200, 200);
 
+    // ctx.fillStyle = "rgb(10, 10, 10)";
+    // ctx.fillRect(0, 0, 100, 100);
+
+
+    // for(let r = 0; r < 20; r++)
     for(let i = 0; i < 30; i++) {
         let angle = i / 30 * Math.PI * 2;
         let r = 7 + Math.sin(angle * 4) * 4;
-        let x = Math.cos(angle) * 7;
-        let y = Math.sin(angle) * 7;
+        let x = Math.cos(angle) * 7;// + Math.random() * 0.5;
+        let y = Math.sin(angle) * 7;// + Math.random() * 0.5;
 
         ctx.beginPath();
         ctx.lineWidth = 0.1;
         if(i% 2 == 0)
-            ctx.strokeStyle = "rgb(80, 80, 80)";
+            ctx.strokeStyle = "rgba(80, 80, 80, 1)";
         else
-            ctx.strokeStyle = "rgb(160, 160, 160)";
+            ctx.strokeStyle = "rgba(160, 160, 160, 1)";
 
         ctx.arc(x, y, r * 0.07, 0, 2 * Math.PI);
         ctx.stroke();

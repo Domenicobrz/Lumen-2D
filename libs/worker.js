@@ -31,6 +31,7 @@ var WORLD_SIZE = {
 var LIGHT_BOUNCES; 
 
 var USE_STRATIFIED_SAMPLING = false;
+var SAMPLING_RATIO_PER_PIXEL_COVERED;
 
 var Globals;
 var motionBlurPhotonsCount = 0;
@@ -59,6 +60,7 @@ onmessage = e => {
         WORLD_SIZE.w = Globals.WORLD_SIZE * (canvasSize.width / canvasSize.height);  
         LIGHT_BOUNCES = Globals.LIGHT_BOUNCES; 
         USE_STRATIFIED_SAMPLING = Globals.USE_STRATIFIED_SAMPLING;
+        SAMPLING_RATIO_PER_PIXEL_COVERED = Globals.samplingRatioPerPixelCovered;
 
         workerDataReference = e.data;
         workerIndex = e.data.workerIndex;
@@ -95,7 +97,7 @@ function initOffscreenCanvas() {
     offscreenCanvasCtx.translate(Globals.canvasSize.width / 2, Globals.canvasSize.height / 2);
     offscreenCanvasCtx.scale(verticalScale, verticalScale);
 
-    offscreenCanvasCtx.fillStyle = "rgb(255,255,255)";
+    offscreenCanvasCtx.fillStyle = "rgb(128,128,128)";
     offscreenCanvasCtx.fillRect(
         -WORLD_SIZE.w / 2 - 1, // -1 and +2 are added to make sure the edges are fully covered
         -WORLD_SIZE.h / 2 - 1, 
@@ -106,7 +108,7 @@ function initOffscreenCanvas() {
 }
 
 function resetCanvasState() {
-    offscreenCanvasCtx.fillStyle = "rgb(255,255,255)";
+    offscreenCanvasCtx.fillStyle = "rgb(128,128,128)";
     offscreenCanvasCtx.fillRect(
         -WORLD_SIZE.w / 2 - 1, // -1 and +2 are added to make sure the edges are fully covered
         -WORLD_SIZE.h / 2 - 1, 
@@ -235,7 +237,7 @@ function colorPhoton(ray, t, emitterColor, contribution, worldAttenuation) {
 
         // IMPORTANT:  WE NEED TO TAKE LESS SAMPLES IF THE RAY IS SHORT (proportionally)!! OTHERWISE we would increase radiance along short rays in an unproportional way
         // because we would add more emitterColor along those smaller rays 
-        let SAMPLES = Math.max(  Math.floor(continuousSteps * 0.15),  1  );
+        let SAMPLES = Math.max(  Math.floor(continuousSteps * SAMPLING_RATIO_PER_PIXEL_COVERED),  1  );
         let SAMPLES_STRENGHT = continuousSteps / SAMPLES; // think of it this way: if we should have sampled 30 pixels (with the line sampling method), but instead we're just 
                                                           // coloring two, then these two pixels need 15x times the amount of radiance
     
