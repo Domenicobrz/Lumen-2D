@@ -28,26 +28,32 @@ var Globals = {
 
 
 
+
+
+
+
+
+    registerVideo: false,
+    photonsPerVideoFrame: 100000,
+    framesCount: 30,
+
+
+
+
     motionBlur: false,
-    motionBlurFramePhotons: 5000, 
-
-
-
-
-    // see if it's possible to update the contribution of the canvas pixels
-    // all at once without having to do it for each pixel
+    motionBlurFramePhotons: 15000, 
 
 
 
     // activating an oc canvas slows down render times by about 1.8x
-    deactivateOffscreenCanvas: false,
-    offscreenCanvasCPow: 2,
+    deactivateOffscreenCanvas: true,
+    offscreenCanvasCPow: 4,
 
 
 
     canvasSize: { 
-        width:  1910,
-        height: 995,
+        width:  1900,
+        height: 900,
     },
 
 

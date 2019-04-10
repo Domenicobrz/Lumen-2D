@@ -15,7 +15,7 @@ import { ContributionModifierMaterial } from "./material/contributionModifier.js
 import { quickNoise } from "./dependencies/quick-noise.js";
 
 
-function createScene(scene, workerData, motionBlurT, ctx) {
+function createScene(scene, workerData, motionBlurT, ctx, frameNumber) {
 
     // let edgeMaterial = new LambertMaterial({ opacity: 1 });
     let edgeMaterial = new EmitterMaterial({ opacity: 1, 
@@ -58,22 +58,23 @@ function createScene(scene, workerData, motionBlurT, ctx) {
 
 
     // for(let r = 0; r < 20; r++)
-    for(let i = 0; i < 30; i++) {
-        let angle = i / 30 * Math.PI * 2;
-        let r = 7 + Math.sin(angle * 4) * 4;
-        let x = Math.cos(angle) * 7;// + Math.random() * 0.5;
-        let y = Math.sin(angle) * 7;// + Math.random() * 0.5;
+    // let angleIncreaser = 0.9 * Math.random();
+    // for(let i = 0; i < 30; i++) {
+    //     let angle = i / 30 * Math.PI * 2 + angleIncreaser;
+    //     let r = 7 + Math.sin(angle * 4) * 4;
+    //     let x = Math.cos(angle) * 7;// + Math.random() * 0.5;
+    //     let y = Math.sin(angle) * 7;// + Math.random() * 0.5;
 
-        ctx.beginPath();
-        ctx.lineWidth = 0.1;
-        if(i% 2 == 0)
-            ctx.strokeStyle = "rgba(80, 80, 80, 1)";
-        else
-            ctx.strokeStyle = "rgba(160, 160, 160, 1)";
+    //     ctx.beginPath();
+    //     ctx.lineWidth = 0.1;
+    //     if(i% 2 == 0)
+    //         ctx.strokeStyle = "rgba(80, 80, 80, 1)";
+    //     else
+    //         ctx.strokeStyle = "rgba(160, 160, 160, 1)";
 
-        ctx.arc(x, y, r * 0.07, 0, 2 * Math.PI);
-        ctx.stroke();
-    }
+    //     ctx.arc(x, y, r * 0.07, 0, 2 * Math.PI);
+    //     ctx.stroke();
+    // }
 
 
 
@@ -88,8 +89,11 @@ function createScene(scene, workerData, motionBlurT, ctx) {
         absorption: 0.65
     });
 
+    let cx = Math.cos(frameNumber * 0.05) * 2;
+    let cy = Math.sin(frameNumber * 0.05) * 2;
+
     scene.add(
-        new Circle(0, 0, 5), 
+        new Circle(cx, cy, 5), 
         new LambertMaterial({ 
             opacity: 0.85,
         })

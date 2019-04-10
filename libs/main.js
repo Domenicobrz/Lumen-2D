@@ -5,6 +5,12 @@ import { Edge } from "./geometry/Edge.js";
 import { BVH } from "./bvh.js";
 import { Ray } from "./ray.js";
 import { glMatrix, vec2, mat2, vec3 } from "./dependencies/gl-matrix-es6.js";
+// import { CCapture } from "./dependencies/CCapture.js";
+// import { CCapture } from "./dependencies/CCapture.js";
+import { download } from "./dependencies/download.js";
+import "./dependencies/webm-writer-0.2.0.js";
+
+
 
 window.addEventListener("load", init);
 
@@ -20,15 +26,17 @@ var sharedArray;
 var sharedArray2;
 var photonsFired  = 0;
 var coloredPixels = 0;
+var videoPhotonsCounter = 0;
 var scene;
 
-var frameSkipperValue = 0; // 100;
-var frameSkipperCount = 0;
 
 var needsUpdate = false;
 
 var workers = [];
+var videoWriter;
 
+var activeWorkers = 0;
+var currentVideoFrame = 0;
 
 
 function init() {
@@ -37,7 +45,6 @@ function init() {
 	canvas.height = canvasSize.height;
 	context = canvas.getContext('2d');
     imageDataObject = context.createImageData(canvasSize.width, canvasSize.height);
-
 
     // BVH debug test 
     // debugBvh();
@@ -74,30 +81,24 @@ function init() {
         Globals: Globals,
         randomNumber: Math.random()
     };
+    activeWorkers = Globals.workersCount;
 
     let onWorkerMessage = e => {
-        let message = e.data;
-        let workerPhotonsFired = e.data.photonsFired;
 
-        photonsFired += workerPhotonsFired;
-        coloredPixels += e.data.coloredPixels;
-        // for(let i = 0; i < canvasSize; i++)
-        // for(let j = 0; j < canvasSize; j++) {
-        //     let pixel = pixelBuffer[i][j];
+        if(e.data.type == "photons-fired-update") {
 
-        //     if(pixel.r === undefined) {
-        //         pixel.r = 0;
-        //         pixel.g = 0;
-        //         pixel.b = 0;
-        //     }
+            let message = e.data;
+            let workerPhotonsFired = e.data.photonsFired;
+    
+            photonsFired += workerPhotonsFired;
+            coloredPixels += e.data.coloredPixels;
+         
+            console.log("photons fired: " + photonsFired + " -- colored pixels: " + coloredPixels);
+        }
 
-        //     pixel.r += workerComputedBuffer[i][j].r;
-        //     pixel.g += workerComputedBuffer[i][j].g;
-        //     pixel.b += workerComputedBuffer[i][j].b;
-        // }
-        console.log("photons fired: " + photonsFired + " -- colored pixels: " + coloredPixels);
-
-        // needsUpdate = true;
+        if(e.data.type == "stop-render-acknowledge") {
+            activeWorkers--;
+        }
     };
 
 
@@ -114,7 +115,6 @@ function init() {
         workers[i].postMessage(startWorkerObject);
         workers[i].onmessage = onWorkerMessage;
     }
-
 
     window.addEventListener("keypress", function(e) {
         if(e.key == "k") {
@@ -133,22 +133,95 @@ function init() {
     });
 
 
+
+
+    videoWriter = new WebMWriter({
+        quality: 1,    // WebM image quality from 0.0 (worst) to 1.0 (best)
+        fileWriter: null, // FileWriter in order to stream to a file instead of buffering to memory (optional)
+        fd: null,         // Node.js file handle to write to instead of buffering to memory (optional)
+    
+        // You must supply one of:
+        frameDuration: null, // Duration of frames in milliseconds
+        frameRate: 60,       // Number of frames per second
+    });
+
+
+
     requestAnimationFrame(renderSample);
+}
+
+
+
+
+
+
+let prepareNextVideoFrameSteps = {
+    STOP_WORKERS: 0,
+    WAITING_WORKERS_BLOCK: 3,
+    ALL_WORKERS_BLOCKED: 1,
+    ALL_WORKERS_ACTIVE: 2,
+    currentStep: 2,
+}
+function prepareNextVideoFrame() {
+    if(prepareNextVideoFrameSteps.currentStep === prepareNextVideoFrameSteps.ALL_WORKERS_ACTIVE) {
+        return true;
+    }
+
+
+
+    if(prepareNextVideoFrameSteps.currentStep === prepareNextVideoFrameSteps.STOP_WORKERS) {
+
+        for(let i = 0; i < Globals.workersCount; i++) {
+            workers[i].postMessage({ type: "stop-rendering" });
+        }
+
+        prepareNextVideoFrameSteps.currentStep = prepareNextVideoFrameSteps.WAITING_WORKERS_BLOCK;
+    }
+
+    if(prepareNextVideoFrameSteps.currentStep === prepareNextVideoFrameSteps.WAITING_WORKERS_BLOCK) {
+        if(activeWorkers === 0) {
+            prepareNextVideoFrameSteps.currentStep = prepareNextVideoFrameSteps.ALL_WORKERS_BLOCKED;
+            resetAccumulatedSamples();
+        }
+    }
+
+    if(prepareNextVideoFrameSteps.currentStep === prepareNextVideoFrameSteps.ALL_WORKERS_BLOCKED) {
+        
+        for(let i = 0; i < Globals.workersCount; i++) {
+            workers[i].postMessage({ type: "compute-next-video-frame", frameNumber: currentVideoFrame });
+        }
+
+        activeWorkers = Globals.workersCount;
+        prepareNextVideoFrameSteps.currentStep = prepareNextVideoFrameSteps.ALL_WORKERS_ACTIVE;
+    }
+
+    return false; // not completed
+}
+
+
+function resetAccumulatedSamples() {
+    var length = canvasSize.width * canvasSize.height * 3;
+    for (let i = 0; i < length; i++) {
+        sharedArray[i] = 0;
+    }
+    for (let i = 0; i < Globals.workersCount; i++) {
+        sharedArray2[i] = 0;
+    }
+
+    photonsFired  = 0;
+    coloredPixels = 0;
+    videoPhotonsCounter = 0;
 }
 
 
 function renderSample() {
     requestAnimationFrame(renderSample);
+    if(Globals.registerVideo && !prepareNextVideoFrame()) return;
+
     // if(!needsUpdate) return;
     // needsUpdate = false;
 
 
-
-    // *********** used only for animation
-    frameSkipperCount++;
-    if(frameSkipperCount < frameSkipperValue) return;
-    else frameSkipperCount = 0;
-    // *********** used only for animation - END
 
 
 	var imageData = imageDataObject.data;
@@ -164,6 +237,8 @@ function renderSample() {
     for (let i = 0; i < Globals.workersCount; i++) {
         photonsCount += sharedArray2[i];
     }
+
+
 
     // fill with base color
     for (var i = 0; i < canvasSize.width * canvasSize.height * 4; i += 4)
@@ -216,6 +291,33 @@ function renderSample() {
     }
 
     context.putImageData(imageDataObject, 0, 0);
+
+
+
+
+
+
+    if(Globals.registerVideo) {
+        if((photonsCount - videoPhotonsCounter) > Globals.photonsPerVideoFrame) {
+
+            videoPhotonsCounter = photonsCount;    
+    
+            if(currentVideoFrame >= Globals.framesCount) {
+                videoWriter.complete().then(function(webMBlob) {
+                    download(webMBlob, "video.webm", 'video/webm');
+                });
+    
+                videoPhotonsCounter = Infinity;
+            } else {
+                currentVideoFrame++;
+                prepareNextVideoFrameSteps.currentStep = prepareNextVideoFrameSteps.STOP_WORKERS;
+    
+                console.log("new frame saved -- " + currentVideoFrame);
+    
+                videoWriter.addFrame(canvas);
+            }
+        }
+    }
 }
 
 

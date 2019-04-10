@@ -41,6 +41,11 @@ var offscreenCanvasCtx;
 var offscreenCanvasPixels;
 var offscreenPixelNormalizationFactor = 1 / 255;
 
+var stopRendering = false;
+var stopRenderingAcknowledge = false;
+
+var currentVideoFrame = 0;
+
 onmessage = e => {
 
     if(e.data.type == "start") {
@@ -75,11 +80,33 @@ onmessage = e => {
 
 
         initOffscreenCanvas();
-        createScene(scene, e.data, Math.random(), offscreenCanvasCtx);
+        createScene(scene, e.data, Math.random(), offscreenCanvasCtx, currentVideoFrame);
         // get data written to canvas
         offscreenCanvasPixels = offscreenCanvasCtx.getImageData(0, 0, offcanvas.width, offcanvas.height).data;
 
         requestAnimationFrame(renderSample);
+    }
+
+    if(e.data.type == "compute-next-video-frame") {
+        currentVideoFrame = e.data.frameNumber;
+
+        sceneArgs.showBVHdebug = false;
+        scene.args = sceneArgs;
+        scene.reset();
+        resetCanvasState();
+        createScene(scene, workerDataReference, Math.random(), offscreenCanvasCtx, currentVideoFrame);
+        offscreenCanvasPixels = offscreenCanvasCtx.getImageData(0, 0, offcanvas.width, offcanvas.height).data;        
+        motionBlurPhotonsCount = 0;
+
+        stopRendering = false;
+        stopRenderingAcknowledge = false;
+
+        requestAnimationFrame(renderSample);
+    }
+
+    if(e.data.type == "stop-rendering") {
+        stopRendering = true;
+        stopRenderingAcknowledge = false;
     }
 
     if(e.data.type == "Globals-update") {
@@ -119,8 +146,28 @@ function resetCanvasState() {
 }
 
 
+
+function updateScene(motionBlurT) {
+    sceneArgs.showBVHdebug = false;
+    scene.args = sceneArgs;
+    scene.reset();
+    resetCanvasState();
+    createScene(scene, workerDataReference, motionBlurT, offscreenCanvasCtx, currentVideoFrame);
+    offscreenCanvasPixels = offscreenCanvasCtx.getImageData(0, 0, offcanvas.width, offcanvas.height).data;        
+}
+
+
 function renderSample() {
-    requestAnimationFrame(renderSample);
+    if(!stopRendering) {
+        requestAnimationFrame(renderSample);
+    } else if (!stopRenderingAcknowledge) {
+        postMessage({
+            type: "stop-render-acknowledge"
+        });
+
+        stopRenderingAcknowledge = true;
+        return;
+    }
 
 
     // also make sure to reset this
@@ -138,12 +185,7 @@ function renderSample() {
         // ********** Motion blur logic 
         motionBlurPhotonsCount += 1;
         if(Globals.motionBlur && (motionBlurPhotonsCount >= Globals.motionBlurFramePhotons)) {
-            sceneArgs.showBVHdebug = false;
-            scene.args = sceneArgs;
-            scene.reset();
-            resetCanvasState();
-            createScene(scene, workerDataReference, Math.random(), offscreenCanvasCtx);
-            offscreenCanvasPixels = offscreenCanvasCtx.getImageData(0, 0, offcanvas.width, offcanvas.height).data;        
+            updateScene(Math.random());
             motionBlurPhotonsCount = 0;
         }
         // ********** Motion blur logic - END
@@ -154,6 +196,7 @@ function renderSample() {
 
 
     postMessage({
+        type: "photons-fired-update",
         photonsFired: Globals.PHOTONS_PER_FRAME,
         coloredPixels: coloredPixels,
     });
@@ -177,52 +220,7 @@ function colorPhoton(ray, t, emitterColor, contribution, worldAttenuation) {
     let tmp        = vec2.create();
     let previousPixel = [-1, -1];
 
-
-    // THIS SAMPLING METHOD IS DEPRECATED!! IT USES THE OLD ASSUMPTION THAT THE CANVAS IS A SQUARE
-    // if(!Globals.RENDER_TYPE_NOISE) {
-
-    //     for(let i = 0; i < steps; i++) {
-    //         let t = step * (i + Math.random() * 1);
-    //         vec2.scaleAndAdd(worldPoint, ray.o, ray.d, t);
-
-    //         // convert world point to pixel coordinate
-    //         let u = (worldPoint[0] + WORLD_SIZE / 2) / WORLD_SIZE;
-    //         let v = (worldPoint[1] + WORLD_SIZE / 2) / WORLD_SIZE;
-
-    //         let px = Math.floor(u * canvasSize);
-    //         let py = Math.floor(v * canvasSize);
-
-    //         let attenuation = Math.exp(-t * worldAttenuation);
-
-    //         if(previousPixel[0] == px && previousPixel[1] == py || px >= canvasSize || py >= canvasSize || px < 0 || py < 0) {
-    //             continue;
-    //         } else {
-    //             previousPixel[0] = px;
-    //             previousPixel[1] = py;
-
-    //             let index = (py * canvasSize + px) * 3;
-
-    //             // let prevR = Atomics.load(sharedArray, index + 0);
-    //             // let prevG = Atomics.load(sharedArray, index + 1);
-    //             // let prevB = Atomics.load(sharedArray, index + 2);
-    //             // Atomics.store(sharedArray, index + 0, prevR + emitterColor[0] * contribution * attenuation);
-    //             // Atomics.store(sharedArray, index + 1, prevG + emitterColor[1] * contribution * attenuation);
-    //             // Atomics.store(sharedArray, index + 2, prevB + emitterColor[2] * contribution * attenuation);
-
-    //             let prevR = sharedArray[index + 0];
-    //             let prevG = sharedArray[index + 1];
-    //             let prevB = sharedArray[index + 2];
-    //             sharedArray[index + 0] = prevR + emitterColor[0] * contribution * attenuation * stepAttenuation;
-    //             sharedArray[index + 1] = prevG + emitterColor[1] * contribution * attenuation * stepAttenuation;
-    //             sharedArray[index + 2] = prevB + emitterColor[2] * contribution * attenuation * stepAttenuation;
-    //         }
-    //     }
-
-    //     coloredPixels += steps;
-    // }
-
-
-
+    
 
     if(Globals.RENDER_TYPE_NOISE) {
         // we can't use "steps" as a base value for a random sampling strategy, because we're sampling in a "continuous" domain!!
