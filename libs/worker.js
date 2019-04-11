@@ -1,13 +1,6 @@
-// importScripts('dependencies/gl-matrix.js');
 import { Scene } from "./scene.js";
-import { Edge } from "./geometry/Edge.js";
-import { Circle } from "./geometry/Circle.js";
-import { Ray } from "./ray.js";
-import { Pixel } from "./pixel.js";
 import { glMatrix, vec2 } from "./dependencies/gl-matrix-es6.js";
-import { Utils } from "./utils.js";
 import { createScene } from "./createScene.js";
-import { ContributionModifierMaterial } from "./material/contributionModifier.js";
 
 
 var canvasSize;
@@ -19,7 +12,7 @@ var coloredPixels = 0;
 var frameSkipperValue = 0; // 100;
 var frameSkipperCount = 0;
 var sharedArray;
-var sharedArray2;
+var sharedInfoArray;
 
 var workerDataReference;
 var workerIndex;
@@ -49,13 +42,13 @@ var currentVideoFrame = 0;
 onmessage = e => {
 
     if(e.data.type == "start") {
-        canvasSize = e.data.canvasSize;
-
-        sharedArray = new Float32Array(e.data.sharedBuffer);
-        sharedArray2 = new Float32Array(e.data.sharedBuffer2);
-
         // passing globals from main.js since they could change while the app is running
         Globals = e.data.Globals;
+
+        canvasSize = Globals.canvasSize;
+
+        sharedArray = new Float32Array(e.data.sharedBuffer);
+        sharedInfoArray = new Float32Array(e.data.sharedInfoBuffer);
 
         if(Globals.highPrecision)
             glMatrix.setMatrixArrayType(Float64Array);
@@ -173,7 +166,7 @@ function renderSample() {
 
     for(let i = 0; i < photonCount; i++) {
         emitPhoton();
-        sharedArray2[workerIndex] += 1;
+        sharedInfoArray[workerIndex] += 1;
 
 
 

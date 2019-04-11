@@ -4,6 +4,8 @@ var Globals = {
     // if set to true, uses Float64Arrays, which are 2x slower to work with
     highPrecision: false,
 
+    // number of webworkers to spawn 
+    workersCount: 5,
 
     RENDER_TYPE_NOISE: true,
     PHOTONS_PER_FRAME: 10000,
@@ -49,12 +51,11 @@ var Globals = {
 
 
     canvasSize: { 
-        width:  800,//1900,
-        height: 800,//980,
+        width:  800,
+        height: 800,
     },
 
 
-    workersCount: 5,
 
 
     // Reinhard tonemapping settings
