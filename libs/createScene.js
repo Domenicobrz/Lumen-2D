@@ -17,15 +17,7 @@ import { quickNoise } from "./dependencies/quick-noise.js";
 
 function createScene(scene, workerData, motionBlurT, ctx, frameNumber) {
 
-    // let edgeMaterial = new LambertMaterial({ opacity: 1 });
-    let edgeMaterial = new EmitterMaterial({ opacity: 1, 
-        color: 
-        function() { return {
-            wavelength: Math.random() * 310 + 380,
-            intensity: 1.5,
-        }  
-    }, samplePower: 1 });
-    let edgeMaterial2 = new LambertMaterial({ opacity: 1 });
+    let edgeMaterial = new LambertMaterial({ opacity: 1 });
     let tbound = 11;
     let lbound = 19.5;
     let rbound = 19.5;
@@ -37,13 +29,13 @@ function createScene(scene, workerData, motionBlurT, ctx, frameNumber) {
 
 
     scene.add(ledge, edgeMaterial);
-    scene.add(redge, edgeMaterial2);
-    scene.add(tedge, edgeMaterial2);
-    scene.add(bedge, edgeMaterial2);
+    scene.add(redge, edgeMaterial);
+    scene.add(tedge, edgeMaterial);
+    scene.add(bedge, edgeMaterial);
 
 
 
-    let seed = "juice921"; //Math.floor(workerData.randomNumber * 1000000000);
+    let seed = "235554"; //Math.floor(workerData.randomNumber * 1000000000);
     // console.log(seed);
     Utils.setSeed(seed);
     let rand = Utils.rand;
@@ -51,35 +43,7 @@ function createScene(scene, workerData, motionBlurT, ctx, frameNumber) {
 
 
 
-
-
-    // ctx.fillStyle = "rgb(10, 10, 10)";
-    // ctx.fillRect(0, 0, 100, 100);
-
-
-    // for(let r = 0; r < 20; r++)
-    // let angleIncreaser = 0.9 * Math.random();
-    // for(let i = 0; i < 30; i++) {
-    //     let angle = i / 30 * Math.PI * 2 + angleIncreaser;
-    //     let r = 7 + Math.sin(angle * 4) * 4;
-    //     let x = Math.cos(angle) * 7;// + Math.random() * 0.5;
-    //     let y = Math.sin(angle) * 7;// + Math.random() * 0.5;
-
-    //     ctx.beginPath();
-    //     ctx.lineWidth = 0.1;
-    //     if(i% 2 == 0)
-    //         ctx.strokeStyle = "rgba(80, 80, 80, 1)";
-    //     else
-    //         ctx.strokeStyle = "rgba(160, 160, 160, 1)";
-
-    //     ctx.arc(x, y, r * 0.07, 0, 2 * Math.PI);
-    //     ctx.stroke();
-    // }
-
-
-
-
-
+    
     let triangleMaterial =  new DielectricMaterial({
         opacity: 1,
         transmittance: 1,
@@ -89,31 +53,130 @@ function createScene(scene, workerData, motionBlurT, ctx, frameNumber) {
         absorption: 0.65
     });
 
-    let cx = Math.cos(frameNumber * 0.05) * 2;
-    let cy = Math.sin(frameNumber * 0.05) * 2;
+   
 
+
+    // makeCircles(scene, 0, 0, 0, 7, 0, frameNumber);
+    
+    for(let i = 0; i < 60; i++) {
+        let angle1 = (i / 60) * Math.PI * 2;
+        let x1 = Math.cos(angle1) * 5;
+        let y1 = Math.sin(angle1) * 5;
+
+        let angle2 = ((i+1) / 60) * Math.PI * 2;
+        let x2 = Math.cos(angle2) * 5;
+        let y2 = Math.sin(angle2) * 5;
+
+
+        let ss = 0.95;
+        let edge = new Edge(x2, y2, x1, y1);
+        let edge2 = new Edge(x1 * ss, y1 * ss, x2 * ss, y2 * ss);
+        let material1 = new LambertMaterial({ opacity: 0.7 });
+        let material2 = new LambertHollowMaterial({ opacity: 0.7 });
+
+        scene.add(edge, material1);
+        scene.add(edge2, material2);
+    }
+   
+
+
+
+    
     scene.add(
-        new Circle(cx, cy, 5), 
-        new LambertMaterial({ 
-            opacity: 0.85,
-        })
-        // triangleMaterial,
+        new Circle(-15, 0, 2), 
+        new EmitterMaterial({ 
+            opacity: 0,
+            color: [400, 400, 400] })
     );
-    
-//     scene.add(
-//         new Circle(-3.25, 0, 1), 
-//         // triangleMaterial,
-//         new LambertMaterial({ 
-//             opacity: 0.95,
-//         })
-//     );
-    
-//     scene.add(
-//         new Circle(3.25, 0, 1), 
-//         new LambertMaterial({ 
-//             opacity: 0.95,
-//         })
-//     );
+
+    // let x = 15, y = 5;
+    // for(let i = 0; i < 5; i++) {
+
+    //     let xDir = i % 2 === 0 ? 1 : -1;
+    //     x = -x;
+    //     y -= 1.5;
+
+    //     scene.add(
+    //         new Edge(x, y, x, y + 0.1), 
+    //         new BeamEmitterMaterial({ 
+    //             opacity: 0,
+    //             beamDirection: [xDir, 0],
+    //             // color: [400, 400, 400] 
+    //             color: function() {
+
+    //                 let i = 1.5;
+    //                 let w = 680;
+
+    //                 if(Math.random() > 0) w = Math.random() * 360 + 380;
+
+    //                 if(w > 400 && w < 450) i = 2;
+
+    //                 return {
+    //                     wavelength: w,
+    //                     intensity: i * 15,
+    //                 }
+    //             }, 
+    //             // since the Scene class samples lightsources depending on their strenght, we can't know beforehand what's the value inside 
+    //             // the "color" property (it's a function!) so we *have* to specify a sampling value for this light source 
+    //             samplePower: 150,
+    //         })
+    //     );
+    // }
 }
+
+
+
+
+
+function makeCircles(scene, depth, x, y, r, sa, frameNumber) {
+
+    let material1 = new LambertMaterial({ opacity: 0.85, });
+    let material2 = new DielectricMaterial({ 
+        opacity: 1,
+        transmittance: 1,
+        ior: 1.5,
+        roughness: 0.1,
+        dispersion: 0.15,
+        absorption: 0.45
+    });
+
+    let material = material1;
+    if(depth === 1) material = material2;
+    // if(depth === 0) material = new LambertMaterial({ opacity: 0.7 });
+    // if(depth === 2) material = material2;
+    // if(depth === 4) material = new EmitterMaterial( { opacity: 0, color: [350 * Utils.rand(), 350 * Utils.rand(), 350 * Utils.rand()] });
+
+    if(Utils.rand() > 0.8 && depth > 1) {
+        let r = 1250 * Utils.rand() * ( 1 + depth * 0.3);
+        let g = 1250 * Utils.rand() * ( 1 + depth * 0.3);
+        let b = 1250 * Utils.rand() * ( 1 + depth * 0.3);
+        material = new EmitterMaterial( { opacity: 0.7, color: [r,g,b] });
+    }
+
+
+    scene.add(new Circle(x, y, r), material);
+    if(depth > 3) return;
+
+
+    sa = sa + Utils.rand() * Math.PI + frameNumber * 0.1;
+
+    let pa1 = -1;
+    let pa2 = -1;
+    let pa3 = -1;
+    for(let i = 0; i < 3; i++) {
+
+        let slice = (Math.PI * 2) / 3;
+        let angle = sa + slice * i;// + Utils.rand() * slice * 0.5;
+
+        let nr = (r / 2.5);
+        let nx = x + Math.cos(angle) * (r-nr - r * 0.025);
+        let ny = y + Math.sin(angle) * (r-nr - r * 0.025);
+
+        makeCircles(scene, depth + 1, nx, ny, nr, sa, frameNumber);
+    }
+}
+
+
+
 
 export { createScene };

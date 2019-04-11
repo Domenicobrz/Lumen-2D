@@ -90,12 +90,7 @@ onmessage = e => {
     if(e.data.type == "compute-next-video-frame") {
         currentVideoFrame = e.data.frameNumber;
 
-        sceneArgs.showBVHdebug = false;
-        scene.args = sceneArgs;
-        scene.reset();
-        resetCanvasState();
-        createScene(scene, workerDataReference, Math.random(), offscreenCanvasCtx, currentVideoFrame);
-        offscreenCanvasPixels = offscreenCanvasCtx.getImageData(0, 0, offcanvas.width, offcanvas.height).data;        
+        updateScene(Math.random());      
         motionBlurPhotonsCount = 0;
 
         stopRendering = false;

@@ -142,7 +142,7 @@ function init() {
     
         // You must supply one of:
         frameDuration: null, // Duration of frames in milliseconds
-        frameRate: 60,       // Number of frames per second
+        frameRate: Globals.framesPerSecond, // Number of frames per second
     });
 
 

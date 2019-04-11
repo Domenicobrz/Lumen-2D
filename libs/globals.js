@@ -22,7 +22,7 @@ var Globals = {
                         // [ -WORLD_SIZE/2 ,  +WORLD_SIZE/2 ]
                         // the specified size is related to the height of the viewport, the width depends on the aspect ratio
     worldAttenuation: 0.2, 
-    LIGHT_BOUNCES: 25,
+    LIGHT_BOUNCES: 35,
     skipBounce: 0,      // skips n bounces before drawing the color value to the screen
 
 
@@ -31,19 +31,13 @@ var Globals = {
 
 
 
-
-
     registerVideo: false,
-    photonsPerVideoFrame: 100000,
-    framesCount: 30,
-
-
-
+    photonsPerVideoFrame: 50000,
+    framesPerSecond: 30,
+    framesCount: 120,
 
     motionBlur: false,
     motionBlurFramePhotons: 15000, 
-
-
 
     // activating an oc canvas slows down render times by about 1.8x
     deactivateOffscreenCanvas: true,
@@ -51,9 +45,12 @@ var Globals = {
 
 
 
+
+
+
     canvasSize: { 
-        width:  1900,
-        height: 900,
+        width:  800,//1900,
+        height: 800,//980,
     },
 
 
