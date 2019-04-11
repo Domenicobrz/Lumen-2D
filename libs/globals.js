@@ -41,7 +41,7 @@ var Globals = {
 
     // activating an oc canvas slows down render times by about 1.8x
     deactivateOffscreenCanvas: true,
-    offscreenCanvasCPow: 4,
+    offscreenCanvasCPow: 2,
 
 
 
