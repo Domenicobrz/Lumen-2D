@@ -171,8 +171,10 @@ function makeCircles(scene, depth, x, y, r, sa, frameNumber, ctx) {
     if(depth < 4 && depth > 0) scene.add(new Circle(x, y, r), material);
     if(depth > 3) return;
 
+    let t = (frameNumber / 30);
+    t = t * t * (3 - 2 * t);
 
-    sa = sa + Utils.rand() * Math.PI + frameNumber * 0.1;
+    sa = sa + Utils.rand() * Math.PI + t * 0.3;
 
     for(let i = 0; i < 3; i++) {
 

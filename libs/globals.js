@@ -8,7 +8,7 @@ var Globals = {
     workersCount: 5,
 
     RENDER_TYPE_NOISE: true,
-    PHOTONS_PER_FRAME: 10000,
+    PHOTONS_PER_UPDATE: 10000,
     USE_STRATIFIED_SAMPLING: true,
     // variable determining how many samples are drawn from a line
     // eg. if a light ray is "200 pixels long" the amount of pixels actually drawn
@@ -18,7 +18,7 @@ var Globals = {
     // a lower number of photons fired
     // values towards zero will draw less samples per line, so expect less pixels drawn but
     // a bigger number of photons fired
-    samplingRatioPerPixelCovered: 0.04,
+    samplingRatioPerPixelCovered: 0.14,
 
     WORLD_SIZE: 20,     // effectively means the horizontal extent will be
                         // [ -WORLD_SIZE/2 ,  +WORLD_SIZE/2 ]
@@ -34,9 +34,10 @@ var Globals = {
 
 
     registerVideo: false,
-    photonsPerVideoFrame: 50000,
+    photonsPerVideoFrame: 10000,
     framesPerSecond: 30,
-    framesCount: 120,
+    framesCount: 30,
+    frameStart: 0,
 
     motionBlur: false,
     motionBlurFramePhotons: 15000, 
@@ -51,8 +52,8 @@ var Globals = {
 
 
     canvasSize: { 
-        width:  800,
-        height: 800,
+        width:  400,
+        height: 400,
     },
 
 

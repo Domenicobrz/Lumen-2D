@@ -13,7 +13,7 @@ class BVH {
             averageIntersectionCalls: 0,
         }
 
-        // crea un BVHNode root e lo aggiungo alla queue
+        // create a BVHNode root and add it to the queue
         this.stats = stats;
         this.root           = new BVHNode();
         this.root.leaf           = false;
@@ -27,12 +27,12 @@ class BVH {
         let queue = [];
         queue.push(this.root);
 
-        // finchè la queue non è vuota
+        // until queue is not empty
         while ( queue.length > 0 ) {
-            // prende il primo nodo dalla queue e lo rimuove
+            // remove the first node from the queue
             let node = queue.shift();
 
-            // computa l'AABB del nodo corrente in base ai figli, e calcola un possibile splitting axis / point 
+            // calculate a possible splitting axis / point 
             let nodeAABB        = new AABB();
             let nodeCentersAABB = new AABB();  // used to decide the splitting axis
             for(let i = 0; i < node.objectsIndices.length; i++) {
@@ -44,9 +44,8 @@ class BVH {
             }
             node.aabb = nodeAABB;
 
-            // se il nodo ha solo 2 figli, diventa una leaf
+            // if the node has two children, it becomes a leaf
             if ( node.objectsIndices.length <= 2 ) {
-                // diventa una leaf, dunque non computiamo altri eventuali figli
                 node.leaf   = true;
 
                 let object1, object2;
@@ -55,9 +54,9 @@ class BVH {
 
                 if(object1) node.child1 = object1;
                 if(object2) node.child2 = object2;                
-            } // altrimenti, dobbiamo computare i figli
+            } // otherwise we need to compute its children
             else {  
-                // scegli lo splitting axis
+                // choose a splitting axis
                 let xAxisLength = Math.abs(nodeCentersAABB.min[0] - nodeCentersAABB.max[0]);
                 let xAxisCenter = (nodeCentersAABB.min[0] + nodeCentersAABB.max[0]) / 2;
                 let yAxisLength = Math.abs(nodeCentersAABB.min[1] - nodeCentersAABB.max[1]);
@@ -65,7 +64,7 @@ class BVH {
                 let splitOnX    = xAxisLength > yAxisLength ? true : false;
                 let splitCenter = xAxisLength > yAxisLength ? xAxisCenter : yAxisCenter;
 
-                // crea i nodi figli
+                // create child nodes
                 let node1 = new BVHNode();
                 let node2 = new BVHNode();
                 node1.leaf = false;
@@ -86,7 +85,6 @@ class BVH {
                 // stats collection - END
 
 
-                // crea un array di indici per entrambi i figli
                 node1.objectsIndices = [];
                 node2.objectsIndices = [];
                 let axisIndex = splitOnX ? 0 : 1;
@@ -101,10 +99,10 @@ class BVH {
                     }
                 }
                 
-                // assicurati entrambi i figli abbiano almeno 1 elemento (puo' succedere che uno dei due array sia vuoto se tutti gli oggetti hanno lo stesso centro)
-                // se ciò non accade, ripartiziona la metà degli elementi in entrambi i nodi
+                // make sure both children have at least one element (might happen that one of the two arrays is empty if all objects share the same center)
+                // if that doesn't happen, partition elements in both nodes
                 if(node1.objectsIndices.length === 0) {
-                    // m sarà ALMENO pari a 1. perchè se entriamo in questo if, node2.objectsIndices.length è pari ad ALMENO 3
+                    // m will be at least 1. if we got in here, node2.objectsIndices.length is at least 3
                     let m = Math.floor(node2.objectsIndices.length / 2);
                     for (let i = 0; i < m; i++) {
                         node1.objectsIndices.push(node2.objectsIndices.shift());
@@ -112,7 +110,7 @@ class BVH {
                     stats.degenerateNodes++;
                 }
                 if(node2.objectsIndices.length === 0) {
-                    // m sarà ALMENO pari a 1. perchè se entriamo in questo if, node1.objectsIndices.length è pari ad ALMENO 3
+                    // m will be at least 1. if we got in here, node1.objectsIndices.length is at least 3
                     let m = Math.floor(node1.objectsIndices.length / 2);
                     for (let i = 0; i < m; i++) {
                         node2.objectsIndices.push(node1.objectsIndices.shift());
@@ -120,13 +118,12 @@ class BVH {
                     stats.degenerateNodes++;
                 }
 
-                // aggiungili alla queue
+                // push to queue
                 queue.push(node1);
                 queue.push(node2);
             }
 
-            // rimuovi il nodo dalla queue dopo che lo abbiamo processato --- già fatto tramite .shift();
-            // azzera il suo array di indici dei "figli temporanei", così evitiamo sprechi monumentali di memoria
+            // reset the "temporary children" array of the node since we don't need it anymore
             node.objectsIndices = [];
         }
 
@@ -142,99 +139,6 @@ class BVH {
     }
 
     intersect(ray) {
-        /*
-        
-        
-naiveBVHHitRecord naiveBVH::traverseStack(naiveBVHNode* rootnode, Ray ray) {
-
-	naiveBVHHitRecord rec = { INFINITY, nullptr };
-	
-	std::vector<naiveBVHNode*> toVisit;
-	toVisit.push_back(rootnode);
-	
-	Primitive* closestPrim = nullptr;
-	float mint = INFINITY;
-
-
-	while (toVisit.size() != 0) {
-		naiveBVHNode* node = toVisit.back();
-
-
-
-		// vv NOT STRICTLY NEEDED - TEST PERFORMANCE WITH AND WITHOUT vv 
-		// vv NOT STRICTLY NEEDED - TEST PERFORMANCE WITH AND WITHOUT vv 
-		if (mint != INFINITY && node->boundingBox.intersect(ray) > mint) {
-			toVisit.pop_back();
-			continue;
-		}
-		// ^^ NOT STRICTLY NEEDED - TEST PERFORMANCE WITH AND WITHOUT ^^ 
-		// ^^ NOT STRICTLY NEEDED - TEST PERFORMANCE WITH AND WITHOUT ^^ 
-
-
-
-
-
-
-		if (node->flags & NAIVEBVH_INTERNALNODE) {
-			naiveBVHNode* nodeleft = node->nodeleft;
-			naiveBVHNode* noderight = node->noderight;
-			toVisit.pop_back();
-
-
-			float t1 = nodeleft->boundingBox.intersect(ray);
-			float t2 = noderight->boundingBox.intersect(ray);
-
-			if (t1 == INFINITY && t2 == INFINITY) continue;
-			if (t1 != INFINITY && t2 == INFINITY) {
-				if (t1 < mint) toVisit.push_back(nodeleft);
-				continue;
-			}
-			if (t1 == INFINITY && t2 != INFINITY) {
-				if (t2 < mint) toVisit.push_back(noderight);
-				continue;
-			}
-
-			if (t1 < t2) {
-				if (t1 < mint) toVisit.push_back(nodeleft);
-				if (t2 < mint) toVisit.push_back(noderight);
-			} else {
-				if (t2 < mint) toVisit.push_back(noderight);
-				if (t1 < mint) toVisit.push_back(nodeleft);
-			}
-		}
-
-		if (node->flags & NAIVEBVH_LEAFNODE) {
-			Primitive* left = node->left;
-			Primitive* right = node->right;
-			toVisit.pop_back();
-
-			float t1 = left->intersect(ray);
-			float t2 = right->intersect(ray);
-
-			if (t1 == INFINITY && t2 == INFINITY) continue;
-			
-			if (t1 < t2) {
-				if (t1 < mint) {
-					mint = t1;
-					closestPrim = left;
-				}
-			} else {
-				if (t2 < mint) {
-					mint = t2;
-					closestPrim = right;
-				}
-			}
-		}
-	}
-
-	
-	if (mint != INFINITY) {
-		rec = { mint, closestPrim };
-	}
-
-	return rec;
-}
-        */
 
         this.stats.intersectionTests++;
 
@@ -304,8 +208,6 @@ naiveBVHHitRecord naiveBVH::traverseStack(naiveBVHNode* rootnode, Ray ray) {
 
     /**
      * used for debugging only
-     * THIS FUNCTION ONLY DRAWS VERTICAL EDGES WITH A HEIGHT OF 1!
-     * THIS FUNCTION ONLY DRAWS VERTICAL EDGES WITH A HEIGHT OF 1!
      * THIS FUNCTION ONLY DRAWS VERTICAL EDGES WITH A HEIGHT OF 1! 
      * @param {*} ctx 
      * @param {*} w 

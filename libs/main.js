@@ -1,9 +1,6 @@
 import { Globals } from "./globals.js";
 import { glMatrix, vec2, mat2, vec3 } from "./dependencies/gl-matrix-es6.js";
-import { download } from "./dependencies/download.js";
-import "./dependencies/webm-writer-0.2.0.js";
-
-
+import { VideoManager } from "./videoManager.js";
 
 window.addEventListener("load", init);
 
@@ -12,22 +9,16 @@ var context;
 var imageDataObject;
 
 var canvasSize = Globals.canvasSize;
-var sharedBuffer;
 var sharedArray;
-// used to track how many photons have been fired
-var sharedInfoBuffer;
+// used to track how many photons have been fired by each worker
 var sharedInfoArray;
+
 var photonsFired  = 0;
 var coloredPixels = 0;
-var videoPhotonsCounter = 0;
-
 
 var workers = [];
-var videoWriter;
 
-var activeWorkers = 0;
-var currentVideoFrame = 0;
-
+var videoManager;
 
 function init() {
     canvas = document.getElementById('canvas');
@@ -47,7 +38,7 @@ function init() {
     var sharedBuffer = new SharedArrayBuffer(size); 
     // will be used to store information on photons traced
     var sharedInfoBuffer = new SharedArrayBuffer(Globals.workersCount * 4); 
-    sharedArray = new Float32Array(sharedBuffer);
+    sharedArray     = new Float32Array(sharedBuffer);
     sharedInfoArray = new Float32Array(sharedInfoBuffer);
     for (let i = 0; i < canvasPixelsCount; i++) {
         sharedArray[i] = 0;
@@ -56,17 +47,30 @@ function init() {
         sharedInfoArray[i] = 0;
     }
 
+    
+
+    startWebworkers(sharedBuffer, sharedInfoBuffer);
+
+
+    videoManager = new VideoManager(Globals, workers, canvas);
+    videoManager.addEventListener("reset-samples", resetAccumulatedSamples);
+
+
+    requestAnimationFrame(renderSample);
+}
+
+
+function startWebworkers(sharedBuffer, sharedInfoBuffer) {
     let startWorkerMessage = {
-        type: "start",
+        messageType: "start",
         sharedBuffer: sharedBuffer,
         sharedInfoBuffer: sharedInfoBuffer,
         workerIndex: 0,
         Globals: Globals,
     };
-    activeWorkers = Globals.workersCount;
 
     let onWorkerMessage = e => {
-        if(e.data.type == "photons-fired-update") {
+        if(e.data.messageType == "photons-fired-update") {
 
             let message = e.data;
             let workerPhotonsFired = e.data.photonsFired;
@@ -77,13 +81,10 @@ function init() {
             console.log("photons fired: " + photonsFired + " -- colored pixels: " + coloredPixels);
         }
 
-        if(e.data.type == "stop-render-acknowledge") {
-            activeWorkers--;
+        if(e.data.messageType == "stop-render-acknowledge") {
+            videoManager.onWorkerAcknowledge();
         }
     };
-
-
-
 
     let workersCount = Globals.workersCount;
     for(let i = 0; i < workersCount; i++) {
@@ -92,77 +93,8 @@ function init() {
         workers[i].postMessage(startWorkerMessage);
         workers[i].onmessage = onWorkerMessage;
     }
-
-
-
-
-    videoWriter = new WebMWriter({
-        quality: 1,    // WebM image quality from 0.0 (worst) to 1.0 (best)
-        fileWriter: null, // FileWriter in order to stream to a file instead of buffering to memory (optional)
-        fd: null,         // Node.js file handle to write to instead of buffering to memory (optional)
-    
-        // You must supply one of:
-        frameDuration: null, // Duration of frames in milliseconds
-        frameRate: Globals.framesPerSecond, // Number of frames per second
-    });
-
-
-
-
-    requestAnimationFrame(renderSample);
 }
-
-
-
-
-
-
-let prepareNextVideoFrameSteps = {
-    STOP_WORKERS: 0,
-    WAITING_WORKERS_BLOCK: 3,
-    ALL_WORKERS_BLOCKED: 1,
-    ALL_WORKERS_ACTIVE: 2,
-    currentStep: 2,
-}
-function prepareNextVideoFrame() {
-    if(prepareNextVideoFrameSteps.currentStep === prepareNextVideoFrameSteps.ALL_WORKERS_ACTIVE) {
-        return true;
-    }
-
-
-    // stop every active webworker
-    if(prepareNextVideoFrameSteps.currentStep === prepareNextVideoFrameSteps.STOP_WORKERS) {
-
-        for(let i = 0; i < Globals.workersCount; i++) {
-            workers[i].postMessage({ type: "stop-rendering" });
-        }
-
-        prepareNextVideoFrameSteps.currentStep = prepareNextVideoFrameSteps.WAITING_WORKERS_BLOCK;
-    }
-
-    // wait until all webworkers have received the stop message and acknowledged it,
-    // then reset the current canvas state to prepare for a new frame
-    if(prepareNextVideoFrameSteps.currentStep === prepareNextVideoFrameSteps.WAITING_WORKERS_BLOCK) {
-        if(activeWorkers === 0) {
-            prepareNextVideoFrameSteps.currentStep = prepareNextVideoFrameSteps.ALL_WORKERS_BLOCKED;
-            resetAccumulatedSamples();
-        }
-    }
-
-    // restart all webworkers and start computing the next video frame
-    if(prepareNextVideoFrameSteps.currentStep === prepareNextVideoFrameSteps.ALL_WORKERS_BLOCKED) {
-        
-        for(let i = 0; i < Globals.workersCount; i++) {
-            workers[i].postMessage({ type: "compute-next-video-frame", frameNumber: currentVideoFrame });
-        }
-
-        activeWorkers = Globals.workersCount;
-        prepareNextVideoFrameSteps.currentStep = prepareNextVideoFrameSteps.ALL_WORKERS_ACTIVE;
-    }
-
-    return false; // not completed
-}
-
+ 
 
 function resetAccumulatedSamples() {
     var length = canvasSize.width * canvasSize.height * 3;
@@ -175,13 +107,12 @@ function resetAccumulatedSamples() {
 
     photonsFired  = 0;
     coloredPixels = 0;
-    videoPhotonsCounter = 0;
 }
 
 
 function renderSample() {
     requestAnimationFrame(renderSample);
-    if(Globals.registerVideo && !prepareNextVideoFrame()) return;
+    if(Globals.registerVideo && videoManager.preparingNextFrame) return;
 
 
 	var imageData = imageDataObject.data;
@@ -247,29 +178,7 @@ function renderSample() {
 
 
 
-
-
     if(Globals.registerVideo) {
-        // if the amount of photons fired since last frame exceeds the value in Globals.photonsPerVideoFrame
-        // begin webworkers synchronization to reset their state and compute a new frame
-        if((photonsCount - videoPhotonsCounter) > Globals.photonsPerVideoFrame) {
-
-            videoPhotonsCounter = photonsCount;    
-    
-            if(currentVideoFrame >= Globals.framesCount) {
-                videoWriter.complete().then(function(webMBlob) {
-                    download(webMBlob, "video.webm", 'video/webm');
-                });
-    
-                videoPhotonsCounter = Infinity;
-            } else {
-                currentVideoFrame++;
-                prepareNextVideoFrameSteps.currentStep = prepareNextVideoFrameSteps.STOP_WORKERS;
-    
-                console.log("video frame saved: " + currentVideoFrame);
-    
-                videoWriter.addFrame(canvas);
-            }
-        }
+        videoManager.update(photonsCount);
     }
 }

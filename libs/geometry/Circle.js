@@ -27,7 +27,7 @@ class Circle extends Geometry {
     }
 
     intersect(ray) {
-        let e = ray.d     // e=ray.dir
+        let e = ray.d   
 
         let center = vec2.clone(this.center);
         if(this.blur > 0) {
@@ -47,12 +47,12 @@ class Circle extends Geometry {
         
 
         let h = vec2.create();
-        vec2.sub(h, center, ray.o);          // h=r.o-c.M
+        vec2.sub(h, center, ray.o);         
 
-        let lf = vec2.dot(e, h);                  // lf=e.h
-        let s  = this.radius * this.radius - vec2.dot(h,h) + lf * lf;   // s=r^2-h^2+lf^2
+        let lf = vec2.dot(e, h);                 
+        let s  = this.radius * this.radius - vec2.dot(h,h) + lf * lf;  
         if (s < 0.0) return false;               // no intersection points ?
-        s = Math.sqrt(s);                         // s=sqrt(r^2-h^2+lf^2)
+        s = Math.sqrt(s);                       
 
         let intersectionPoints = 0;        
         if (lf < s) {                             // S1 behind A ?
@@ -68,12 +68,12 @@ class Circle extends Geometry {
         let S1 = vec2.create();
         let S2 = vec2.create();
 
-        vec2.scale(S1, e, lf-s);                  // S1.set(PVector.mult(e, lf-s));  
+        vec2.scale(S1, e, lf-s);                  
         let t = vec2.length(S1);
-        vec2.add(S1, S1, ray.o);                  // S1.add(ray.origin); // S1=A+e*(lf-s)
+        vec2.add(S1, S1, ray.o);                  
 
-        vec2.scale(S2, e, lf+s);                  // S2.set(PVector.mult(e, lf+s));  
-        vec2.add(S2, S2, ray.o);                  // S2.add(ray.origin); // S2=A+e*(lf+s)
+        vec2.scale(S2, e, lf+s);                 
+        vec2.add(S2, S2, ray.o);                  
 
 
         let normal = vec2.create();
@@ -82,14 +82,12 @@ class Circle extends Geometry {
 
 
         let result = {
-            // point: S1,
             t: t,
             normal: normal,
         }
 
         return result;
     }
-
 
 
     // used to sample a point if this object is an emitter
