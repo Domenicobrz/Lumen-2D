@@ -27,11 +27,7 @@ function init() {
 	context = canvas.getContext('2d');
     imageDataObject = context.createImageData(canvasSize.width, canvasSize.height);
 
-
-    if(!Globals.RENDER_TYPE_NOISE) {
-        console.warn("The line sampling integrator is deprecated, RENDER_TYPE_NOISE now always defaults to true");
-    }
-
+    
 
     var canvasPixelsCount = canvasSize.width * canvasSize.height * 3;
     var size = Float32Array.BYTES_PER_ELEMENT * canvasPixelsCount;
@@ -117,9 +113,9 @@ function renderSample() {
 
 	var imageData = imageDataObject.data;
 
-    let mapped = vec3.create();
-    let gamma    = Globals.gamma;
-    let exposure = Globals.exposure;
+    let mappedColor = vec3.create();
+    let gamma       = Globals.gamma;
+    let exposure    = Globals.exposure;
 
 
     // counting how many photons have been traced, each worker will update its own slot in sharedInfoArray
@@ -129,8 +125,7 @@ function renderSample() {
     }
 
 
-    for (var i = 0; i < canvasSize.width * canvasSize.height * 4; i += 4)
-    {
+    for (var i = 0; i < canvasSize.width * canvasSize.height * 4; i += 4) {
         let pixelIndex = Math.floor(i / 4);
         let y = canvasSize.height - 1 - Math.floor(pixelIndex / canvasSize.width);
         let x = pixelIndex % canvasSize.width;
@@ -145,17 +140,17 @@ function renderSample() {
         // Exposure tone mapping
         // from: https://learnopengl.com/Advanced-Lighting/HDR
         if(Globals.toneMapping) {
-            mapped[0] = 1 - Math.exp(-r * exposure);
-            mapped[1] = 1 - Math.exp(-g * exposure);
-            mapped[2] = 1 - Math.exp(-b * exposure);
+            mappedColor[0] = 1 - Math.exp(-r * exposure);
+            mappedColor[1] = 1 - Math.exp(-g * exposure);
+            mappedColor[2] = 1 - Math.exp(-b * exposure);
 
-            mapped[0] = Math.pow(mapped[0], 1 / gamma);
-            mapped[1] = Math.pow(mapped[1], 1 / gamma);
-            mapped[2] = Math.pow(mapped[2], 1 / gamma);
+            mappedColor[0] = Math.pow(mappedColor[0], 1 / gamma);
+            mappedColor[1] = Math.pow(mappedColor[1], 1 / gamma);
+            mappedColor[2] = Math.pow(mappedColor[2], 1 / gamma);
 
-            r = mapped[0] * 255;
-            g = mapped[1] * 255;
-            b = mapped[2] * 255;
+            r = mappedColor[0] * 255;
+            g = mappedColor[1] * 255;
+            b = mappedColor[2] * 255;
         } else {
             r *= 255;
             g *= 255;

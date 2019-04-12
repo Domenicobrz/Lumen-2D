@@ -5,10 +5,9 @@ var Globals = {
     highPrecision: false,
 
     // number of webworkers to spawn 
-    workersCount: 5,
+    workersCount: 1,
 
-    RENDER_TYPE_NOISE: true,
-    PHOTONS_PER_UPDATE: 10000,
+    PHOTONS_PER_UPDATE: 50000,
     USE_STRATIFIED_SAMPLING: true,
     // variable determining how many samples are drawn from a line
     // eg. if a light ray is "200 pixels long" the amount of pixels actually drawn
@@ -34,7 +33,7 @@ var Globals = {
 
 
     registerVideo: false,
-    photonsPerVideoFrame: 10000,
+    photonsPerVideoFrame: 5000000,
     framesPerSecond: 30,
     framesCount: 30,
     frameStart: 0,
@@ -52,8 +51,8 @@ var Globals = {
 
 
     canvasSize: { 
-        width:  400,
-        height: 400,
+        width:  800,
+        height: 800,
     },
 
 

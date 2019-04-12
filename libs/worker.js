@@ -143,9 +143,9 @@ function renderSample() {
     coloredPixels = 0;
     let photonCount = Globals.PHOTONS_PER_UPDATE;
 
-
     for(let i = 0; i < photonCount; i++) {
         emitPhoton();
+        // increase the counter of photons fired for this webworker
         sharedInfoArray[workerIndex] += 1;
 
 
@@ -158,7 +158,6 @@ function renderSample() {
         // ********** Motion blur logic - END
     }
     
-
     postMessage({
         messageType: "photons-fired-update",
         photonsFired: Globals.PHOTONS_PER_UPDATE,
@@ -169,104 +168,89 @@ function renderSample() {
 function colorPhoton(ray, t, emitterColor, contribution, worldAttenuation) {
     let worldPixelSize = WORLD_SIZE.h / canvasSize.height;
     let step = worldPixelSize;
-    let steps = Math.floor(t / step);
-    // only used if "steps" ends up being 0
-    let stepAttenuation = 1;
 
-    // the "steps" variable is deprecated and only used in the line-sampling-method
-    // RENDER_TYPE_NOISE now uses continuousSteps which is defined in its code block
-    if(steps === 0) {
-        steps++;
-        stepAttenuation = t / step;
-    }
 
     let worldPoint = vec2.create();
-    let tmp        = vec2.create();
     let previousPixel = [-1, -1];
 
     
+    // we can't use "steps" as a base value for a random sampling strategy, because we're sampling in a "continuous" domain
+    // e.g.: if t / step ends up being 2.5, 'steps' will be set to 2, and assume we choose to compute only 1 sample, (since remember that RENDER_TYPE_NOISE 
+    // only chooses to compute a subset of the total amount of pixels touched by a light ray) then SAMPLES_STRENGHT would hold (steps / SAMPLES) == 2, 
+    // but the "real" sample_strenght should be 2.5  
+    let continuousSteps = t / step;
 
-    if(Globals.RENDER_TYPE_NOISE) {
-        // we can't use "steps" as a base value for a random sampling strategy, because we're sampling in a "continuous" domain
-        // e.g.: if t / step ends up being 2.5, 'steps' will be set to 2, and assume we choose to compute only 1 sample, (since remember that RENDER_TYPE_NOISE 
-        // only chooses to compute a subset of the total amount of pixels touched by a light ray) then SAMPLES_STRENGHT would hold (steps / SAMPLES) == 2, 
-        // but the "real" sample_strenght should be 2.5  
-        let continuousSteps = t / step;
+    // IMPORTANT:  we need to take less samples if the ray is short (proportionally) - otherwise we would increase radiance along short rays in an unproportional way
+    // because we would add more emitterColor along those smaller rays 
+    let SAMPLES = Math.max(  Math.floor(continuousSteps * SAMPLING_RATIO_PER_PIXEL_COVERED),  1  );
+    let SAMPLES_STRENGHT = continuousSteps / SAMPLES; // e.g. if the line touches 30 pixels, but instead we're just 
+                                                      // coloring two, then these two pixels need 15x times the amount of radiance
 
-        // IMPORTANT:  we need to take less samples if the ray is short (proportionally) - otherwise we would increase radiance along short rays in an unproportional way
-        // because we would add more emitterColor along those smaller rays 
-        let SAMPLES = Math.max(  Math.floor(continuousSteps * SAMPLING_RATIO_PER_PIXEL_COVERED),  1  );
-        let SAMPLES_STRENGHT = continuousSteps / SAMPLES; // e.g. if the line touches 30 pixels, but instead we're just 
-                                                          // coloring two, then these two pixels need 15x times the amount of radiance
-    
-        let sample_step = t / SAMPLES;
-        for(let i = 0; i < SAMPLES; i++) {
+    let sample_step = t / SAMPLES;
+    for(let i = 0; i < SAMPLES; i++) {
 
-            let tt;
-            if(USE_STRATIFIED_SAMPLING) {
-                tt = sample_step * i;
-                tt += sample_step * Math.random();    
-            } else {
-                tt = t * Math.random();
-            }
-
-            vec2.scaleAndAdd(worldPoint, ray.o, ray.d, tt);
-    
-            // convert world point to pixel coordinate
-            let u = (worldPoint[0] + WORLD_SIZE.w / 2) / WORLD_SIZE.w;
-            let v = (worldPoint[1] + WORLD_SIZE.h / 2) / WORLD_SIZE.h;
-    
-            let px = Math.floor(u * canvasSize.width);
-            let py = Math.floor(v * canvasSize.height);
-    
-            let attenuation = Math.exp(-tt * worldAttenuation);
-    
-            if(previousPixel[0] == px && previousPixel[1] == py || px >= canvasSize.width || py >= canvasSize.height || px < 0 || py < 0) {
-                continue;
-            } else {
-                previousPixel[0] = px;
-                previousPixel[1] = py;
-    
-                let index  = (py * canvasSize.width + px) * 3;
-                let cindex = (py * canvasSize.width + px) * 4;
-
-
-
-                let ocr = 1;
-                let ocg = 1;
-                let ocb = 1;
-
-                if(!Globals.deactivateOffscreenCanvas) {
-                    ocr = (offscreenCanvasPixels[cindex + 0] * offscreenPixelNormalizationFactor) * 2 - 1;
-                    ocg = (offscreenCanvasPixels[cindex + 1] * offscreenPixelNormalizationFactor) * 2 - 1;
-                    ocb = (offscreenCanvasPixels[cindex + 2] * offscreenPixelNormalizationFactor) * 2 - 1;
-                    
-                    // at this point ocr, ocg, ogb are in the range [-1 ... +1]
-                    // offscreenCanvasCPow decides how "strong" the drawing effect is,
-                    // by using an exponential function that increases the original  -1 ... +1 range
-                    ocr = Math.exp(ocr * Globals.offscreenCanvasCPow);
-                    ocg = Math.exp(ocg * Globals.offscreenCanvasCPow);
-                    ocb = Math.exp(ocb * Globals.offscreenCanvasCPow);
-                }
-
-
-
-                let prevR = sharedArray[index + 0];
-                let prevG = sharedArray[index + 1];
-                let prevB = sharedArray[index + 2];
-
-                let ss = SAMPLES_STRENGHT * contribution * attenuation * stepAttenuation;
-
-                sharedArray[index + 0] = prevR + emitterColor[0] * ss * ocr;
-                sharedArray[index + 1] = prevG + emitterColor[1] * ss * ocg;
-                sharedArray[index + 2] = prevB + emitterColor[2] * ss * ocb;
-            }
+        let tt;
+        if(USE_STRATIFIED_SAMPLING) {
+            tt = sample_step * i;
+            tt += sample_step * Math.random();    
+        } else {
+            tt = t * Math.random();
         }
 
-        coloredPixels += SAMPLES;
-    }
-}
+        vec2.scaleAndAdd(worldPoint, ray.o, ray.d, tt);
 
+        // convert world point to pixel coordinate
+        let u = (worldPoint[0] + WORLD_SIZE.w / 2) / WORLD_SIZE.w;
+        let v = (worldPoint[1] + WORLD_SIZE.h / 2) / WORLD_SIZE.h;
+
+        let px = Math.floor(u * canvasSize.width);
+        let py = Math.floor(v * canvasSize.height);
+
+        let attenuation = Math.exp(-tt * worldAttenuation);
+
+        if(previousPixel[0] == px && previousPixel[1] == py || px >= canvasSize.width || py >= canvasSize.height || px < 0 || py < 0) {
+            continue;
+        } else {
+            previousPixel[0] = px;
+            previousPixel[1] = py;
+
+            let index  = (py * canvasSize.width + px) * 3;
+            let cindex = (py * canvasSize.width + px) * 4;
+
+
+
+            let ocr = 1;
+            let ocg = 1;
+            let ocb = 1;
+
+            if(!Globals.deactivateOffscreenCanvas) {
+                ocr = (offscreenCanvasPixels[cindex + 0] * offscreenPixelNormalizationFactor) * 2 - 1;
+                ocg = (offscreenCanvasPixels[cindex + 1] * offscreenPixelNormalizationFactor) * 2 - 1;
+                ocb = (offscreenCanvasPixels[cindex + 2] * offscreenPixelNormalizationFactor) * 2 - 1;
+                
+                // at this point ocr, ocg, ogb are in the range [-1 ... +1]
+                // offscreenCanvasCPow decides how "strong" the drawing effect is,
+                // by using an exponential function that increases the original  -1 ... +1 range
+                ocr = Math.exp(ocr * Globals.offscreenCanvasCPow);
+                ocg = Math.exp(ocg * Globals.offscreenCanvasCPow);
+                ocb = Math.exp(ocb * Globals.offscreenCanvasCPow);
+            }
+
+
+            let prevR = sharedArray[index + 0];
+            let prevG = sharedArray[index + 1];
+            let prevB = sharedArray[index + 2];
+
+            let ss = SAMPLES_STRENGHT * contribution * attenuation;
+
+            sharedArray[index + 0] = prevR + emitterColor[0] * ss * ocr;
+            sharedArray[index + 1] = prevG + emitterColor[1] * ss * ocg;
+            sharedArray[index + 2] = prevB + emitterColor[2] * ss * ocb;
+        }
+    }
+
+    coloredPixels += SAMPLES;
+}
 
 function getRGBfromWavelength(Wavelength) {
     let Gamma = 0.80;
@@ -274,31 +258,31 @@ function getRGBfromWavelength(Wavelength) {
     let factor;
     let Red,Green,Blue;
 
-    if((Wavelength >= 380) && (Wavelength<440)){
+    if ((Wavelength >= 380) && (Wavelength<440)) {
         Red = -(Wavelength - 440) / (440 - 380);
         Green = 0.0;
         Blue = 1.0;
-    }else if((Wavelength >= 440) && (Wavelength<490)){
+    } else if ((Wavelength >= 440) && (Wavelength<490)) {
         Red = 0.0;
         Green = (Wavelength - 440) / (490 - 440);
         Blue = 1.0;
-    }else if((Wavelength >= 490) && (Wavelength<510)){
+    } else if ((Wavelength >= 490) && (Wavelength<510)) {
         Red = 0.0;
         Green = 1.0;
         Blue = -(Wavelength - 510) / (510 - 490);
-    }else if((Wavelength >= 510) && (Wavelength<580)){
+    } else if ((Wavelength >= 510) && (Wavelength<580)) {
         Red = (Wavelength - 510) / (580 - 510);
         Green = 1.0;
         Blue = 0.0;
-    }else if((Wavelength >= 580) && (Wavelength<645)){
+    } else if ((Wavelength >= 580) && (Wavelength<645)) {
         Red = 1.0;
         Green = -(Wavelength - 645) / (645 - 580);
         Blue = 0.0;
-    }else if((Wavelength >= 645) && (Wavelength<781)){
+    } else if ((Wavelength >= 645) && (Wavelength<781)) {
         Red = 1.0;
         Green = 0.0;
         Blue = 0.0;
-    }else{
+    } else{
         Red = 0.0;
         Green = 0.0;
         Blue = 0.0;
@@ -306,13 +290,13 @@ function getRGBfromWavelength(Wavelength) {
 
     // Let the intensity fall off near the vision limits
 
-    if((Wavelength >= 380) && (Wavelength<420)){
+    if ((Wavelength >= 380) && (Wavelength<420)) {
         factor = 0.3 + 0.7*(Wavelength - 380) / (420 - 380);
-    }else if((Wavelength >= 420) && (Wavelength<701)){
+    } else if ((Wavelength >= 420) && (Wavelength<701)) {
         factor = 1.0;
-    }else if((Wavelength >= 701) && (Wavelength<781)){
+    } else if ((Wavelength >= 701) && (Wavelength<781)) {
         factor = 0.3 + 0.7*(780 - Wavelength) / (780 - 700);
-    }else{
+    } else {
         factor = 0.0;
     };
 
@@ -320,9 +304,9 @@ function getRGBfromWavelength(Wavelength) {
     let rgb = [0,0,0];
 
     // Don't want 0^x = 1 for x <> 0
-    rgb[0] = Red === 0 ? 0 : Math.floor(   Math.round(IntensityMax * Math.pow(Red * factor, Gamma))   );
-    rgb[1] = Green === 0 ? 0 : Math.floor(   Math.round(IntensityMax * Math.pow(Green * factor, Gamma))   );
-    rgb[2] = Blue === 0 ? 0 : Math.floor(   Math.round(IntensityMax * Math.pow(Blue * factor, Gamma))   );
+    rgb[0] = Red   === 0 ? 0 : Math.floor(  Math.round(IntensityMax * Math.pow(Red * factor, Gamma))   );
+    rgb[1] = Green === 0 ? 0 : Math.floor(  Math.round(IntensityMax * Math.pow(Green * factor, Gamma)) );
+    rgb[2] = Blue  === 0 ? 0 : Math.floor(  Math.round(IntensityMax * Math.pow(Blue * factor, Gamma))  );
 
     return rgb;
 }
@@ -346,14 +330,14 @@ function getColorFromEmitterSpectrum(spectrum) {
 function emitPhoton() {
 
     let emitter = scene.getEmitter();
-    let photon = emitter.material.getPhoton(emitter);
+    let photon  = emitter.material.getPhoton(emitter);
 
-    let ray = photon.ray;
-    let spectrum = photon.spectrum;
+    let ray        = photon.ray;
+    let spectrum   = photon.spectrum;
     let wavelength = spectrum.wavelength;
-    let color = getColorFromEmitterSpectrum(spectrum);
+    let color      = getColorFromEmitterSpectrum(spectrum);
 
-    let contribution = 1.0;                         
+    let contribution     = 1.0;                         
     let worldAttenuation = Globals.worldAttenuation * (1.0 / Globals.WORLD_SIZE);
 
     
@@ -363,7 +347,7 @@ function emitPhoton() {
         // if we had an intersection
         if(result.t) {
 
-            let object = result.object;
+            let object   = result.object;
             let material = object.material;
             
 
@@ -371,10 +355,10 @@ function emitPhoton() {
                 colorPhoton(ray, result.t, color, contribution, worldAttenuation);
 
             let scatterResult = material.computeScattering(ray, result.normal, result.t, contribution, worldAttenuation, wavelength);
-            contribution = scatterResult.contribution;
+            contribution      = scatterResult.contribution;
 
 
-            // if you put a higher value (e.g. 0.01) here's what might happen: 
+            // if you set a higher value (e.g. 0.01) here's what might happen: 
             // say you set worldAttenuation to a very high number, consequently, all your light sources were set at a very bright color,
             // at this point even a small contribution of 0.01 with a light source like: [ 3000, 3000, 3000 ] would be visible,
             // but since you clamped it to 0.01 it wont show up at all! beware of this

@@ -43,27 +43,33 @@ function createScene(scene, workerData, motionBlurT, ctx, frameNumber) {
 
 
 
+    let edge  = new Edge(0, 0, 0, 1);
+    scene.add(edge, new BeamEmitterMaterial({ color: [250, 250, 250], beamDirection: [-1, 0] }));
+
+
+
+
     
-    let triangleMaterial =  new DielectricMaterial({
-        opacity: 1,
-        transmittance: 1,
-        ior: 1.5,
-        roughness: 0.001,
-        dispersion: 0.15,
-        absorption: 0.65
-    });
+    // let triangleMaterial =  new DielectricMaterial({
+    //     opacity: 1,
+    //     transmittance: 1,
+    //     ior: 1.5,
+    //     roughness: 0.001,
+    //     dispersion: 0.15,
+    //     absorption: 0.65
+    // });
 
    
 
-    ctx.fillStyle = "rgb(180, 180, 180)";
-    ctx.beginPath();
-    ctx.arc(0, 2, 5, 0, 2 * Math.PI);
-    ctx.fill();
+    // ctx.fillStyle = "rgb(180, 180, 180)";
+    // ctx.beginPath();
+    // ctx.arc(0, 2, 5, 0, 2 * Math.PI);
+    // ctx.fill();
 
 
 
 
-    makeCircles(scene, 0, 0, 0, 7, 0, frameNumber, ctx);
+    // makeCircles(scene, 0, 0, 0, 7, 0, frameNumber, ctx);
     
     // for(let i = 0; i < 60; i++) {
     //     let angle1 = (i / 60) * Math.PI * 2;
@@ -98,39 +104,39 @@ function createScene(scene, workerData, motionBlurT, ctx, frameNumber) {
     //         color: [400, 400, 400] })
     // );
 
-    let x = 15, y = 5;
-    for(let i = 0; i < 5; i++) {
+    // let x = 15, y = 5;
+    // for(let i = 0; i < 5; i++) {
 
-        let xDir = i % 2 === 0 ? 1 : -1;
-        x = -x;
-        y -= 1.5;
+    //     let xDir = i % 2 === 0 ? 1 : -1;
+    //     x = -x;
+    //     y -= 1.5;
 
-        scene.add(
-            new Edge(x, y, x, y + 0.1), 
-            new BeamEmitterMaterial({ 
-                opacity: 0,
-                beamDirection: [xDir, 0],
-                // color: [400, 400, 400] 
-                color: function() {
+    //     scene.add(
+    //         new Edge(x, y, x, y + 0.1), 
+    //         new BeamEmitterMaterial({ 
+    //             opacity: 0,
+    //             beamDirection: [xDir, 0],
+    //             // color: [400, 400, 400] 
+    //             color: function() {
 
-                    let i = 1.5;
-                    let w = 680;
+    //                 let i = 1.5;
+    //                 let w = 680;
 
-                    if(Math.random() > 0) w = Math.random() * 360 + 380;
+    //                 if(Math.random() > 0) w = Math.random() * 360 + 380;
 
-                    if(w > 400 && w < 450) i = 2;
+    //                 if(w > 400 && w < 450) i = 2;
 
-                    return {
-                        wavelength: w,
-                        intensity: i * 15,
-                    }
-                }, 
-                // since the Scene class samples lightsources depending on their strenght, we can't know beforehand what's the value inside 
-                // the "color" property (it's a function!) so we *have* to specify a sampling value for this light source 
-                samplePower: 150,
-            })
-        );
-    }
+    //                 return {
+    //                     wavelength: w,
+    //                     intensity: i * 15,
+    //                 }
+    //             }, 
+    //             // since the Scene class samples lightsources depending on their strenght, we can't know beforehand what's the value inside 
+    //             // the "color" property (it's a function!) so we *have* to specify a sampling value for this light source 
+    //             samplePower: 150,
+    //         })
+    //     );
+    // }
 }
 
 

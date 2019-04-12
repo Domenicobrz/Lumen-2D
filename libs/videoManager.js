@@ -21,6 +21,7 @@ class VideoManager {
         this.videoPhotonsCounter = 0;
         this.preparingNextFrame = false;
 
+        // reads as "next video frame steps"
         this.nvfSteps = {
             STOP_WORKERS: 0,
             WAITING_WORKERS_BLOCK: 3,
@@ -90,7 +91,7 @@ class VideoManager {
 
 
 
-        // fire this function again if we're not done with it
+        // fire this function again until we're done with it
         if(this.preparingNextFrame) {
             requestAnimationFrame(this.prepareNextVideoFrame.bind(this));
         }
@@ -132,7 +133,8 @@ class VideoManager {
                 this.currentVideoFrame++;
                 this.nvfSteps.currentStep = this.nvfSteps.STOP_WORKERS;
                 this.preparingNextFrame = true;
-                requestAnimationFrame(this.prepareNextVideoFrame.bind(this));
+
+                this.prepareNextVideoFrame();
     
                 console.log("video frame saved: " + this.currentVideoFrame);
     
