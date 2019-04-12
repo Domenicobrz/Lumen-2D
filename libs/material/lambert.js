@@ -10,6 +10,7 @@ class LambertMaterial extends Material {
 
                        // remember: 0 is a valid opacity option, so we need to check for undefined instead of just going   options.opacity || 1
         this.opacity = options.opacity !== undefined ? options.opacity : 1;
+        this.color   = options.color !== undefined ? options.color : [1,1,1];
     }
 
     computeScattering(ray, input_normal, t, contribution, worldAttenuation, wavelength) {
@@ -25,18 +26,17 @@ class LambertMaterial extends Material {
             // let opacityDot = dot + absorbtionDifference * (1 - this.opacity);
 
             // contribution *= opacityDot;
-            contribution *= Math.exp(-t * worldAttenuation);
+            let wa = Math.exp(-t * worldAttenuation);
+            contribution.r *= wa;
+            contribution.g *= wa;
+            contribution.b *= wa;
 
 
             let newOrigin = vec2.create();
             vec2.scaleAndAdd(newOrigin, ray.o, ray.d, t + Globals.epsilon); // it's important that the epsilon value is subtracted/added instead of doing t * 0.999999 since that caused floating point precision issues
             vec2.copy(ray.o, newOrigin);
-
-            
-            
-            scatterResult.contribution = contribution;
  
-            return { contribution: contribution };
+            return;
         }
 
 
@@ -55,9 +55,13 @@ class LambertMaterial extends Material {
         // Compute contribution BEFORE CHANGING THE RAY.O ARRAY!
         // one of your older bug involved placing those lines AFTER changing the ray.o array
         dot = Math.abs(  vec2.dot(ray.d, input_normal)  );
-        contribution *= dot;
-        contribution *= Math.exp(-t * worldAttenuation);
-        
+
+
+        let contrib = Math.exp(-t * worldAttenuation)  *  dot;
+        contribution.r *= contrib * this.color[0];
+        contribution.g *= contrib * this.color[1];
+        contribution.b *= contrib * this.color[2];
+
 
 
 
@@ -93,11 +97,6 @@ class LambertMaterial extends Material {
         vec2.copy(ray.o, newOrigin);
         vec2.copy(ray.d, newDirection);    
 
-
-
-
-        scatterResult.contribution = contribution;
-        return { contribution: contribution };
     }
 }
 

@@ -143,6 +143,7 @@ function renderSample() {
     coloredPixels = 0;
     let photonCount = Globals.PHOTONS_PER_UPDATE;
 
+
     for(let i = 0; i < photonCount; i++) {
         emitPhoton();
         // increase the counter of photons fired for this webworker
@@ -241,11 +242,11 @@ function colorPhoton(ray, t, emitterColor, contribution, worldAttenuation) {
             let prevG = sharedArray[index + 1];
             let prevB = sharedArray[index + 2];
 
-            let ss = SAMPLES_STRENGHT * contribution * attenuation;
+            let ss = SAMPLES_STRENGHT * attenuation;
 
-            sharedArray[index + 0] = prevR + emitterColor[0] * ss * ocr;
-            sharedArray[index + 1] = prevG + emitterColor[1] * ss * ocg;
-            sharedArray[index + 2] = prevB + emitterColor[2] * ss * ocb;
+            sharedArray[index + 0] = prevR + emitterColor[0] * ss * contribution.r * ocr;
+            sharedArray[index + 1] = prevG + emitterColor[1] * ss * contribution.g * ocg;
+            sharedArray[index + 2] = prevB + emitterColor[2] * ss * contribution.b * ocb;
         }
     }
 
@@ -337,7 +338,11 @@ function emitPhoton() {
     let wavelength = spectrum.wavelength;
     let color      = getColorFromEmitterSpectrum(spectrum);
 
-    let contribution     = 1.0;                         
+    let contribution = {
+        r: 1,
+        g: 1,
+        b: 1,
+    };                         
     let worldAttenuation = Globals.worldAttenuation * (1.0 / Globals.WORLD_SIZE);
 
     
@@ -354,15 +359,8 @@ function emitPhoton() {
             if(i >= Globals.skipBounce)
                 colorPhoton(ray, result.t, color, contribution, worldAttenuation);
 
-            let scatterResult = material.computeScattering(ray, result.normal, result.t, contribution, worldAttenuation, wavelength);
-            contribution      = scatterResult.contribution;
 
-
-            // if you set a higher value (e.g. 0.01) here's what might happen: 
-            // say you set worldAttenuation to a very high number, consequently, all your light sources were set at a very bright color,
-            // at this point even a small contribution of 0.01 with a light source like: [ 3000, 3000, 3000 ] would be visible,
-            // but since you clamped it to 0.01 it wont show up at all! beware of this
-            if(contribution < 0.0000000001) return;
+            material.computeScattering(ray, result.normal, result.t, contribution, worldAttenuation, wavelength);
         }
     }
 

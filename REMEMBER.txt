@@ -1,1 +1,0 @@
-- use vec2.NEGATE instead of vec.INVERSE        inverse will return the reciprocal, not the negation!

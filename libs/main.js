@@ -82,6 +82,10 @@ function startWebworkers(sharedBuffer, sharedInfoBuffer) {
         }
     };
 
+    let onWorkerError = e => {
+        console.log(e);
+    }
+
     let workersCount = Globals.workersCount;
     for(let i = 0; i < workersCount; i++) {
         workers.push(new Worker("./libs/worker.js", { type: "module" }));

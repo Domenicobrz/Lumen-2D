@@ -4,7 +4,6 @@ import { Circle } from "../geometry/Circle.js";
 import { Ray } from "../ray.js";
 import { Pixel } from "../pixel.js";
 import { LambertMaterial } from "../material/lambert.js";
-import { MatteMaterial } from "../material/matte.js";
 import { EmitterMaterial } from "../material/emitter.js";
 import { BeamEmitterMaterial } from "../material/beamEmitter.js";
 import { glMatrix, vec2 } from "../dependencies/gl-matrix-es6.js";

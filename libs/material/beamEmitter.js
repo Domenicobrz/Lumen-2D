@@ -18,9 +18,10 @@ class BeamEmitterMaterial extends EmitterMaterial {
         let normal = res.normal;
 
         let offsetDir = 1;
-        if(vec2.dot(normal, this.beamDirection) < 0) 
+        if(vec2.dot(normal, this.beamDirection) < 0) {
             offsetDir = -1;
-
+        }
+        
         // avoids self-intersections
         point[0] += res.normal[0] * 0.00001 * offsetDir;
         point[1] += res.normal[1] * 0.00001 * offsetDir;

@@ -9,12 +9,12 @@ class DielectricMaterial extends Material {
         if(!options) options = { };
 
                        // remember: 0 is a valid opacity option, so we need to check for undefined instead of just going   options.opacity || 1
-        this.opacity = options.opacity !== undefined ? options.opacity : 1;
-        this.roughness = options.roughness !== undefined ? options.roughness : 0.15;
-        this.ior = options.ior !== undefined ? options.ior : 1.4;
+        this.opacity       = options.opacity !== undefined ? options.opacity : 1;
+        this.roughness     = options.roughness !== undefined ? options.roughness : 0.15;
+        this.ior           = options.ior !== undefined ? options.ior : 1.4;
         this.transmittance = options.transmittance !== undefined ? options.transmittance : 1;
-        this.dispersion = options.dispersion !== undefined ? options.dispersion : 0;
-        this.absorption = options.absorption !== undefined ? options.absorption : 0.1;
+        this.dispersion    = options.dispersion !== undefined ? options.dispersion : 0;
+        this.absorption    = options.absorption !== undefined ? options.absorption : 0.1;
     }
 
     setSellmierCoefficients(b1, b2, b3, c1, c2, c3, d) {
@@ -31,22 +31,20 @@ class DielectricMaterial extends Material {
 
     computeScattering(ray, input_normal, t, contribution, worldAttenuation, wavelength) {
 
-        let scatterResult = { };
 
         // opacity test, if it passes we're going to let the ray pass through the object
         if(Math.random() > this.opacity) {
 
-            contribution *= Math.exp(-t * worldAttenuation);
-
+            let wa = Math.exp(-t * worldAttenuation);
+            contribution.r *= wa;
+            contribution.g *= wa;
+            contribution.b *= wa;
 
             let newOrigin = vec2.create();
             vec2.scaleAndAdd(newOrigin, ray.o, ray.d, t + Globals.epsilon); // it's important that the epsilon value is subtracted/added instead of doing t * 0.999999 since that caused floating point precision issues
             vec2.copy(ray.o, newOrigin);
             
-            
-            scatterResult.contribution = contribution;
- 
-            return { contribution: contribution };
+            return;
         }
 
 
@@ -67,7 +65,7 @@ class DielectricMaterial extends Material {
         dot = Math.abs(  vec2.dot(ray.d, input_normal)  );
         // contribution *= dot; 
 
-        /* a dielectric material in Lumen2D needs to specify an absorption value
+        /* a dielectric material in Lumen2D "should" specify an absorption value
            why? Imagine this scenario:
            two mirror objects reflecting the same beam in the same direction
            with an infinite number of bounces. 
@@ -79,13 +77,15 @@ class DielectricMaterial extends Material {
            what's the "fluency" at point x ?
            It would be "infinite"! if we don't use an absorption coefficient,
            and we set a very high light-bounce limit (e.g. 400) the light that enters a dielectric poligon
-           would bounce around it (thanks to fresnel reflection) for a lot of times thus increasing its
+           would bounce around it (thanks to fresnel reflection) a lot of times thus increasing its
            "brightness" on screen, and that could make the dielectric shape look brighter that its lightsource!!
         */
 
-        contribution *= (1 - this.absorption); 
-        contribution *= Math.exp(-t * worldAttenuation);
-        
+        let absorption = (1 - this.absorption);
+        let wa = (Math.exp(-t * worldAttenuation)) * absorption;
+        contribution.r *= wa;
+        contribution.g *= wa;
+        contribution.b *= wa;
 
 
 
@@ -116,27 +116,6 @@ class DielectricMaterial extends Material {
         vec2.transformMat2(w_o, w_o, imat);
 
 
-        // function dielectricReflectance(eta, cosThetaI, cosThetaT) {
-        //     let sinThetaTSq = eta * eta * (1 - cosThetaI * cosThetaI);
-        //     if (sinThetaTSq > 1) {
-        //         cosThetaT = 0;
-        //         return 1.0;
-        //     }
-        //     cosThetaT = Math.sqrt(1 - sinThetaTSq);
-        //     let Rs = (eta * cosThetaI - cosThetaT) / (eta * cosThetaI + cosThetaT);
-        //     let Rp = (eta*cosThetaT - cosThetaI)/(eta*cosThetaT + cosThetaI);
-        //     return (Rs * Rs + Rp * Rp) * 0.5;
-        // }
-
-        // function sampleVisibleNormal(sigma, xi, theta0, theta1) {
-        //     let sigmaSq = sigma*sigma;
-        //     let invSigmaSq = 1 / sigmaSq;
-
-        //     let cdf0 = Math.tanh(theta0 * 0.5 * invSigmaSq);
-        //     let cdf1 = Math.tanh(theta1 * 0.5 * invSigmaSq);
-
-        //     return 2 * sigmaSq * Math.atanh(cdf0 + (cdf1 - cdf0) * xi);  
-        // }
 
 
         let sigma = this.roughness;
@@ -166,8 +145,6 @@ class DielectricMaterial extends Material {
         let etaM = wiDotM < 0 ? ior : 1 / ior;
 
 
-        // let F = dielectricReflectance(etaM, Math.abs(wiDotM), cosThetaT);
-        // expanded to:
         let F = 0;
         let cosThetaI = Math.abs(wiDotM);
         let sinThetaTSq = etaM * etaM * (1 - cosThetaI * cosThetaI);
@@ -198,7 +175,7 @@ class DielectricMaterial extends Material {
         }
 
 
-        // return m*(dot(w_o, m)*2.0) - w_o;
+
         vec2.transformMat2(m, m, mat);
 
         vec2.copy(newDirection, m);
@@ -223,9 +200,6 @@ class DielectricMaterial extends Material {
 
         vec2.copy(ray.o, newOrigin);
         vec2.copy(ray.d, newDirection);    
-
-
-        return { contribution: contribution };
     }
 
 

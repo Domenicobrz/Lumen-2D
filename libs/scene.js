@@ -1,5 +1,5 @@
 import { EmitterMaterial } from "./material/emitter.js";
-import { MatteMaterial } from "./material/matte.js";
+import { LambertMaterial } from "./material/lambert.js";
 import { glMatrix, vec2 } from "./dependencies/gl-matrix-es6.js";
 import { BVH } from "./bvh.js";
 
@@ -22,7 +22,7 @@ class Scene {
     }
 
     add(object, material) {
-        object.material = material || new MatteMaterial();
+        object.material = material || new LambertMaterial();
         this._objects.push(object);
 
         if(object.material instanceof EmitterMaterial) {

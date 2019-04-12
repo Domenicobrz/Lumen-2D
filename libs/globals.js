@@ -5,7 +5,7 @@ var Globals = {
     highPrecision: false,
 
     // number of webworkers to spawn 
-    workersCount: 1,
+    workersCount: 5,
 
     PHOTONS_PER_UPDATE: 50000,
     USE_STRATIFIED_SAMPLING: true,
@@ -51,8 +51,8 @@ var Globals = {
 
 
     canvasSize: { 
-        width:  800,
-        height: 800,
+        width:  1900,
+        height: 980,
     },
 
 
