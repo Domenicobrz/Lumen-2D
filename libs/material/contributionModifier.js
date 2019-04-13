@@ -4,7 +4,7 @@ import { Globals } from "../globals.js";
 
 class ContributionModifierMaterial extends Material {
     constructor(options) {
-        super();
+        super(options);
 
         if(!options) options = { };
 

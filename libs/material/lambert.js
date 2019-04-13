@@ -4,57 +4,32 @@ import { Globals } from "../globals.js";
 
 class LambertMaterial extends Material {
     constructor(options) {
-        super();
+        super(options);
 
         if(!options) options = { };
 
-                       // remember: 0 is a valid opacity option, so we need to check for undefined instead of just going   options.opacity || 1
-        this.opacity = options.opacity !== undefined ? options.opacity : 1;
         this.color   = options.color !== undefined ? options.color : [1,1,1];
     }
 
     computeScattering(ray, input_normal, t, contribution, worldAttenuation, wavelength) {
 
-        let scatterResult = { };
-
+        
         // opacity test, if it passes we're going to let the ray pass through the object
-        if(Math.random() > this.opacity) {
-
-            // Compute contribution BEFORE CHANGING THE RAY.O ARRAY!
-            // let dot = Math.abs(  vec2.dot(ray.d, input_normal)  );
-            // let absorbtionDifference = 1 - dot;
-            // let opacityDot = dot + absorbtionDifference * (1 - this.opacity);
-
-            // contribution *= opacityDot;
-            let wa = Math.exp(-t * worldAttenuation);
-            contribution.r *= wa;
-            contribution.g *= wa;
-            contribution.b *= wa;
-
-
-            let newOrigin = vec2.create();
-            vec2.scaleAndAdd(newOrigin, ray.o, ray.d, t + Globals.epsilon); // it's important that the epsilon value is subtracted/added instead of doing t * 0.999999 since that caused floating point precision issues
-            vec2.copy(ray.o, newOrigin);
- 
+        if(this.opacityTest(t, worldAttenuation, ray, contribution, this.color)) {
             return;
         }
 
 
 
-        // we're going to pick a random point in the hemisphere
-        let dot = vec2.dot(ray.d, input_normal);   // ** REMEMBER !! **    the dot between ray.d & normal here is expected to be LESS than zero! 
-                                                   //                      that's because the incident light ray should normally be negated before making the dot product
+        let dot = vec2.dot(ray.d, input_normal);
         let normal = vec2.clone(input_normal);
-        if(dot > 0.0) {     // if it's greater than zero, we have a problem!  see here ^^^
+        if(dot > 0.0) { 
             vec2.negate(normal, normal);
         }            
 
 
-
-
-        // Compute contribution BEFORE CHANGING THE RAY.O ARRAY!
-        // one of your older bug involved placing those lines AFTER changing the ray.o array
         dot = Math.abs(  vec2.dot(ray.d, input_normal)  );
+
 
 
         let contrib = Math.exp(-t * worldAttenuation)  *  dot;
@@ -63,15 +38,9 @@ class LambertMaterial extends Material {
         contribution.b *= contrib * this.color[2];
 
 
-
-
-
-
         
+
         let newDirection = vec2.create();
-
-
-
 
         // evaluate BRDF
         let xi = Math.random();

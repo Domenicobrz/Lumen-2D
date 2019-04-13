@@ -4,39 +4,17 @@ import { Globals } from "../globals.js";
 
 class MicrofacetMaterial extends Material {
     constructor(options) {
-        super();
+        super(options);
 
         if(!options) options = { };
 
-                       // remember: 0 is a valid opacity option, so we need to check for undefined instead of just going   options.opacity || 1
-        this.opacity = options.opacity !== undefined ? options.opacity : 1;
         this.roughness = options.roughness !== undefined ? options.roughness : 0.25;
     }
 
     computeScattering(ray, input_normal, t, contribution, worldAttenuation, wavelength) {
 
-        let scatterResult = { };
-
         // opacity test, if it passes we're going to let the ray pass through the object
-        if(Math.random() > this.opacity) {
-
-            // Compute contribution BEFORE CHANGING THE RAY.O ARRAY!
-            // let dot = Math.abs(  vec2.dot(ray.d, input_normal)  );
-            // let absorbtionDifference = 1 - dot;
-            // let opacityDot = dot + absorbtionDifference * (1 - this.opacity);
-
-            // contribution *= opacityDot;
-            let wa = Math.exp(-t * worldAttenuation);
-            contribution.r *= wa;
-            contribution.g *= wa;
-            contribution.b *= wa;
-
-
-            let newOrigin = vec2.create();
-            vec2.scaleAndAdd(newOrigin, ray.o, ray.d, t + Globals.epsilon); // it's important that the epsilon value is subtracted/added instead of doing t * 0.999999 since that caused floating point precision issues
-            vec2.copy(ray.o, newOrigin);
-
- 
+        if(this.opacityTest(t, worldAttenuation, ray, contribution)) {
             return;
         }
 
