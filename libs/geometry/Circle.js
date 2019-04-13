@@ -51,16 +51,16 @@ class Circle extends Geometry {
 
         let lf = vec2.dot(e, h);                 
         let s  = this.radius * this.radius - vec2.dot(h,h) + lf * lf;  
-        if (s < 0.0) return false;               // no intersection points ?
+        if (s < 0.0) return false;                // no intersection points ?
         s = Math.sqrt(s);                       
 
         let intersectionPoints = 0;        
         if (lf < s) {                             // S1 behind A ?
             if (lf+s >= 0) {                      // S2 before A ?
                 s = -s;                           // swap S1 <-> S2
-                intersectionPoints = 1;           // one intersection point
+                intersectionPoints = 1;           
             } 
-        } else intersectionPoints = 2;            // 2 intersection points
+        } else intersectionPoints = 2;            
 
         if(intersectionPoints === 0) return false;
         

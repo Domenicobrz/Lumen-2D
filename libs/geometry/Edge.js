@@ -82,6 +82,7 @@ class Edge extends Geometry {
         return false; // No collision
     }
 
+    // used to sample a point if this object is an emitter
     getRandomPoint() {
         let t = Math.random();
 

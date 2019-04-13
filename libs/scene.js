@@ -88,25 +88,6 @@ class Scene {
         let result = this._bvh.intersect(ray);
 
         return result;
-
-        // let minT = 999999999999999999;
-        // let intersectionResult = { };
-
-        // for(let i = 0; i < this._objects.length; i++) {
-        //     let object = this._objects[i];
-        //     let result = object.intersect(ray);
-
-        //     if(result) {
-        //         if(result.t < minT) {
-        //             minT = result.t;
-        //             intersectionResult.object = object;
-        //             intersectionResult.t = minT;
-        //             intersectionResult.normal = vec2.clone(result.normal);
-        //         }
-        //     }
-        // }
-
-        // return intersectionResult;
     }
 }
 

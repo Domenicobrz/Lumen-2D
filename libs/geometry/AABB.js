@@ -23,15 +23,12 @@ class AABB {
         // r.dir is unit direction vector of ray
         let dirfrac_x = 1 / ray.d[0];
         let dirfrac_y = 1 / ray.d[1];
-        // dirfrac.z = 1.0f / r.d.z;
         // lb is the corner of AABB with minimal coordinates - left bottom, rt is maximal corner
         // r.org is origin of ray
         let t1 = (this.min[0] - ray.o[0]) * dirfrac_x;
         let t2 = (this.max[0] - ray.o[0]) * dirfrac_x;
         let t3 = (this.min[1] - ray.o[1]) * dirfrac_y;
         let t4 = (this.max[1] - ray.o[1]) * dirfrac_y;
-        // let t5 = (this.min.z - r.org.z)*dirfrac.z;
-        // let t6 = (this.max.z - r.org.z)*dirfrac.z;
 
         let t    = Infinity;
         let tmin = Math.max(Math.min(t1, t2), Math.min(t3, t4));
