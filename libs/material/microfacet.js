@@ -20,21 +20,13 @@ class MicrofacetMaterial extends Material {
 
 
 
-        // we're going to pick a random point in the hemisphere
-        let dot = vec2.dot(ray.d, input_normal);   // ** REMEMBER !! **    the dot between ray.d & normal here is expected to be LESS than zero! 
-                                                   //                      that's because the incident light ray should normally be negated before making the dot product
+        let dot = vec2.dot(ray.d, input_normal);
         let normal = vec2.clone(input_normal);
-        if(dot > 0.0) {     // if it's greater than zero, we have a problem!  see here ^^^
+        if(dot > 0.0) {
             vec2.negate(normal, normal);
         }            
 
-
-
-
-        // Compute contribution BEFORE CHANGING THE RAY.O ARRAY!
-        // one of your older bug involved placing those lines AFTER changing the ray.o array
         dot = Math.abs(  vec2.dot(ray.d, input_normal)  );
-
         
         let contrib = Math.exp(-t * worldAttenuation) * dot;
         contribution.r *= contrib;
@@ -42,20 +34,12 @@ class MicrofacetMaterial extends Material {
         contribution.b *= contrib;
 
 
+
+
+
+
+
         let newDirection = vec2.create();
-
-
-
-
-
-
-
-
-
-
-
-
-
 
         // evaluate BRDF
         let w_o = vec2.fromValues(-ray.d[0], -ray.d[1]);
@@ -98,17 +82,11 @@ class MicrofacetMaterial extends Material {
 
 
 
-
-
-
-        // bounce off again
         let newOrigin = vec2.create();
-        vec2.scaleAndAdd(newOrigin, ray.o, ray.d, t - Globals.epsilon); // it's important that the epsilon value is subtracted/added instead of doing t * 0.999999 since that caused floating point precision issues
-    
+        vec2.scaleAndAdd(newOrigin, ray.o, ray.d, t - Globals.epsilon); 
 
         vec2.copy(ray.o, newOrigin);
         vec2.copy(ray.d, newDirection);    
-
     }
 }
 

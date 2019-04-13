@@ -6,7 +6,7 @@ class VideoManager {
 
     constructor(Globals, workers, canvas) {
         this.videoWriter = new WebMWriter({
-            quality: 1,    // WebM image quality from 0.0 (worst) to 1.0 (best)
+            quality: 1,       // WebM image quality from 0.0 (worst) to 1.0 (best)
             fileWriter: null, // FileWriter in order to stream to a file instead of buffering to memory (optional)
             fd: null,         // Node.js file handle to write to instead of buffering to memory (optional)
         

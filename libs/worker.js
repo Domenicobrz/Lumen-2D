@@ -158,7 +158,8 @@ function renderSample() {
         }
         // ********** Motion blur logic - END
     }
-    
+
+
     postMessage({
         messageType: "photons-fired-update",
         photonsFired: Globals.PHOTONS_PER_UPDATE,
@@ -217,7 +218,6 @@ function colorPhoton(ray, t, emitterColor, contribution, worldAttenuation) {
 
             let index  = (py * canvasSize.width + px) * 3;
             let cindex = (py * canvasSize.width + px) * 4;
-
 
 
             let ocr = 1;
@@ -328,6 +328,7 @@ function getColorFromEmitterSpectrum(spectrum) {
     return color;
 }
 
+
 function emitPhoton() {
 
     let emitter = scene.getEmitter();
@@ -355,12 +356,14 @@ function emitPhoton() {
             let object   = result.object;
             let material = object.material;
             
-
             if(i >= Globals.skipBounce)
                 colorPhoton(ray, result.t, color, contribution, worldAttenuation);
 
-
             material.computeScattering(ray, result.normal, result.t, contribution, worldAttenuation, wavelength);
+
+            if(contribution.r < 0) contribution.r = 0;
+            if(contribution.g < 0) contribution.g = 0;
+            if(contribution.b < 0) contribution.b = 0;
         }
     }
 

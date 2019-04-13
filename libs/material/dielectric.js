@@ -16,6 +16,16 @@ class DielectricMaterial extends Material {
     }
 
     setSellmierCoefficients(b1, b2, b3, c1, c2, c3, d) {
+
+        /*
+        B1 = 12 * 1.03961212;
+        B2 = 12 * 0.231792344;
+        B3 = 12 * 1.01046945;
+        C1 = 12 * 0.00600069867;
+        C2 = 12 * 0.0200179144;
+        C3 = 12 * 103.560653;
+        */
+
         this.b1 = b1;
         this.b2 = b2;
         this.b3 = b3;
@@ -37,25 +47,22 @@ class DielectricMaterial extends Material {
 
 
 
-        // we're going to pick a random point in the hemisphere
-        let dot = vec2.dot(ray.d, input_normal);   // ** REMEMBER !! **    the dot between ray.d & normal here is expected to be LESS than zero! 
-                                                   //                      that's because the incident light ray should normally be negated before making the dot product
+        let dot = vec2.dot(ray.d, input_normal); 
+                                                 
         let normal = vec2.clone(input_normal);
-        if(dot > 0.0) {     // if it's greater than zero, we have a problem!  see here ^^^
+        if(dot > 0.0) {    
             vec2.negate(normal, normal);
         }            
 
-
-
-
-        // Compute contribution BEFORE CHANGING THE RAY.O ARRAY!
-        // one of your older bug involved placing those lines AFTER changing the ray.o array
-        dot = Math.abs(  vec2.dot(ray.d, input_normal)  );
+        // dot = Math.abs(  vec2.dot(ray.d, input_normal)  );
         // contribution *= dot; 
 
-        /* a dielectric material in Lumen2D "should" specify an absorption value
-           why? Imagine this scenario:
-           two mirror objects reflecting the same beam in the same direction
+
+
+
+        /* a dielectric material in Lumen2D "should" specify an absorption value:
+           
+           imagine two mirror objects reflecting the same beam in the same direction
            with an infinite number of bounces. 
            
            |             |
@@ -66,7 +73,7 @@ class DielectricMaterial extends Material {
            It would be "infinite"! if we don't use an absorption coefficient,
            and we set a very high light-bounce limit (e.g. 400) the light that enters a dielectric poligon
            would bounce around it (thanks to fresnel reflection) a lot of times thus increasing its
-           "brightness" on screen, and that could make the dielectric shape look brighter that its lightsource!!
+           "brightness" on screen, and that could make the dielectric shape look brighter than its lightsource
         */
 
         let absorption = (1 - this.absorption);
@@ -77,32 +84,22 @@ class DielectricMaterial extends Material {
 
 
 
+
+
+
+
+
         let newDirection = vec2.create();
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-        // evaluate BRDF
+        // evaluate BRDF    - from Tantalum
         let w_o = vec2.fromValues(-ray.d[0], -ray.d[1]);
 
 
         // normal rotation matrix
         let mat = mat2.fromValues(input_normal[1], -input_normal[0], input_normal[0], input_normal[1]);
-        // let mat = mat2.fromValues(normal[1], -normal[0], normal[0], normal[1]);
         let imat = mat2.create();
         mat2.invert(imat, mat);
         vec2.transformMat2(w_o, w_o, imat);
-
 
 
 
@@ -114,8 +111,7 @@ class DielectricMaterial extends Material {
         let theta0 = Math.max(theta - PI_HALF, -PI_HALF);
         let theta1 = Math.min(theta + PI_HALF,  PI_HALF);
 
-        // let thetaM = sampleVisibleNormal(sigma, Math.random(), theta0, theta1);
-        // expanded to:
+
         let xi = Math.random();
         let sigmaSq = sigma*sigma;
         let invSigmaSq = 1 / sigmaSq;
@@ -162,8 +158,6 @@ class DielectricMaterial extends Material {
             refracted = true;
         }
 
-
-
         vec2.transformMat2(m, m, mat);
 
         vec2.copy(newDirection, m);
@@ -173,18 +167,17 @@ class DielectricMaterial extends Material {
         
 
 
-        
 
 
 
-        // bounce off again
+
+
         let newOrigin = vec2.create();
 
         if(!refracted) t = t - Globals.epsilon;
         else           t = t + Globals.epsilon; // refracted rays needs to "pass through"
 
-        vec2.scaleAndAdd(newOrigin, ray.o, ray.d, t); // it's important that the epsilon value is subtracted/added instead of doing t * 0.999999 since that caused floating point precision issues
-    
+        vec2.scaleAndAdd(newOrigin, ray.o, ray.d, t); 
 
         vec2.copy(ray.o, newOrigin);
         vec2.copy(ray.d, newDirection);    
@@ -192,44 +185,15 @@ class DielectricMaterial extends Material {
 
 
     getIOR(wavelength) {
+        let iorType = 0;
+        if(this.b1 !== undefined) iorType = 1;  // if Sellmeier's coefficients are provided, use those
 
-        let iorType = 2;
-        if(this.b1 !== undefined) iorType = 3;  // if Sellmeier's coefficients are provided, use those
 
-        if(iorType === 0) {
-
-            /* glass coefficients */
-
-            let B1 = 3 * 1.03961212;
-            let B2 = 3 * 0.231792344;
-            let B3 = 3 * 1.01046945;
-            let C1 = 3 * 0.00600069867;
-            let C2 = 3 * 0.0200179144;
-            let C3 = 3 * 103.560653;
-            let w2 = (wavelength*0.001) * (wavelength*0.001);
-
-            let ior = Math.sqrt(1 + (B1 * w2) / (w2 - C1) + (B2 * w2) / (w2 - C2) + (B3 * w2) / (w2 - C3));
-            return (ior / 1.4);
-        } else if (iorType === 1) {
-
-            /* plastic coefficients */
-
-            let B1 = 12 * 1.03961212;
-            let B2 = 12 * 0.231792344;
-            let B3 = 12 * 1.01046945;
-            let C1 = 12 * 0.00600069867;
-            let C2 = 12 * 0.0200179144;
-            let C3 = 12 * 103.560653;
-            let w2 = (wavelength*0.001) * (wavelength*0.001);
-
-            return Math.sqrt(1 + (B1 * w2) / (w2 - C1) + (B2 * w2) / (w2 - C2) + (B3 * w2) / (w2 - C3));
-        } else if (iorType === 2) {
-
+        if (iorType === 0) {
             let t = ((wavelength - 380) / 360) * 2 - 1;
-            // return (this.ior + t * this.dispersion * Math.pow(Math.random(), 1));
             return (this.ior + t * this.dispersion);
 
-        } else if (iorType === 3) {
+        } else if (iorType === 1) {
             let B1 = this.b1;
             let B2 = this.b2;
             let B3 = this.b3;
@@ -239,11 +203,8 @@ class DielectricMaterial extends Material {
             let w2 = (wavelength*0.001) * (wavelength*0.001);
 
             let res = Math.sqrt(1 + (B1 * w2) / (w2 - C1) + (B2 * w2) / (w2 - C2) + (B3 * w2) / (w2 - C3));
-            // I've seen this.d being used as the actual index of refraction (e.g. Benedikt Bitterly uses 1.4 as the "this.d" parameter)
             return res / this.d;
-
         }
-
     }
 }
 

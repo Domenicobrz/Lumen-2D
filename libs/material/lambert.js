@@ -57,7 +57,7 @@ class LambertMaterial extends Material {
 
         
 
-        // bounce off again
+        
         let newOrigin = vec2.create();
         // it's important that the epsilon value is subtracted/added instead of doing t * 0.999999 since that caused floating point precision issues
         vec2.scaleAndAdd(newOrigin, ray.o, ray.d, t - Globals.epsilon);

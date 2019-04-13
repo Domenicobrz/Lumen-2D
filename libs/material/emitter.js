@@ -23,15 +23,11 @@ class EmitterMaterial extends Material {
         }
 
 
-
-        
-
         let dot = vec2.dot(ray.d, input_normal);
         let normal = vec2.clone(input_normal);
         if(dot > 0.0) {    
             vec2.negate(normal, normal);
         }            
-
 
 
         dot = Math.abs(  vec2.dot(ray.d, input_normal)  );
@@ -44,14 +40,8 @@ class EmitterMaterial extends Material {
 
 
 
-
-
-
         
         let newDirection = vec2.create();
-
-
-
 
         // evaluate BRDF
         let xi = Math.random();

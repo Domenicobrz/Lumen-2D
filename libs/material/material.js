@@ -20,7 +20,8 @@ class Material {
 
 
             let newOrigin = vec2.create();
-            vec2.scaleAndAdd(newOrigin, ray.o, ray.d, t + Globals.epsilon); // it's important that the epsilon value is subtracted/added instead of doing t * 0.999999 since that caused floating point precision issues
+            // it's important that the epsilon value is subtracted/added instead of doing t * 0.999999 since that caused floating point precision issues
+            vec2.scaleAndAdd(newOrigin, ray.o, ray.d, t + Globals.epsilon); 
             vec2.copy(ray.o, newOrigin);
 
             return true;
