@@ -51,8 +51,8 @@ var Globals = {
 
 
     canvasSize: { 
-        width:  1900,
-        height: 980,
+        width:  800,
+        height: 800,
     },
 
 

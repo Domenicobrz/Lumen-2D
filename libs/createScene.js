@@ -4,6 +4,7 @@ import { Circle } from "./geometry/Circle.js";
 import { Ray } from "./ray.js";
 import { Pixel } from "./pixel.js";
 import { LambertMaterial } from "./material/lambert.js";
+import { LambertEmitterMaterial } from "./material/lambertEmitter.js";
 import { EmitterMaterial } from "./material/emitter.js";
 import { BeamEmitterMaterial } from "./material/beamEmitter.js";
 import { glMatrix, vec2 } from "./dependencies/gl-matrix-es6.js";
@@ -45,7 +46,7 @@ function createScene(scene, workerData, motionBlurT, ctx, frameNumber) {
     // let edge  = new Edge(0, 4, 0, 5);
     // scene.add(edge, new BeamEmitterMaterial({ color: [250, 250, 250], beamDirection: [1, 0] }));
 
-    scene.add(new Circle(0,8,2), new EmitterMaterial({ opacity: 0, color: [250,250,250] }));
+    scene.add(new Circle(0,8,2), new LambertEmitterMaterial({ opacity: 0, color: [250,250,250] }));
 
     scene.add(new Circle(0,0,2), new LambertMaterial({ opacity: 0.6, color: [1, 0.5, 0] }));
     scene.add(new Circle(5,0,1.5), new LambertMaterial({ opacity: 0.6, color: [1, 0, 0] }));
