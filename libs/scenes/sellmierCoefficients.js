@@ -1,11 +1,11 @@
-import { Edge } from "../geometry/Edge.js";
-import { LambertMaterial } from "../material/lambert.js";
-import { BeamEmitterMaterial } from "../material/beamEmitter.js";
-import { Utils } from "../utils.js";
-import { DielectricMaterial } from "../material/dielectric.js";
+import { Edge } from "./geometry/Edge.js";
+import { LambertMaterial } from "./material/lambert.js";
+import { BeamEmitterMaterial } from "./material/beamEmitter.js";
+import { Utils } from "./utils.js";
+import { DielectricMaterial } from "./material/dielectric.js";
 
 
-function createScene(scene, workerData) {
+function createScene(scene, workerData, motionBlurT, ctx, frameNumber) {
 
     let edgeMaterial = new LambertMaterial({ opacity: 1 });
     let tbound = 11;
@@ -25,12 +25,9 @@ function createScene(scene, workerData) {
 
 
 
-    // Utils.setSeed("juice921");
     let seed = Math.floor(workerData.randomNumber * 1000000000);
     console.log(seed);
     Utils.setSeed(seed);
-    let rand = Utils.rand;
-
 
 
     for(let i = 0; i < 3; i++) {

@@ -8,7 +8,7 @@ function createScene(scene, workerData, motionBlurT, ctx, frameNumber) {
     createWorldBounds(scene);
 
     
-    scene.add(new Circle(0,0,3), new LambertMaterial({ opacity: 0.6, color: [1, 0.05, 0] }));
+    scene.add(new Circle(0,0,3), new LambertMaterial({ opacity: 0.6, color: [1, 0.25, 0] }));
 
 
     // you need to disable Globals.deactivateOffscreenCanvas to be able to 

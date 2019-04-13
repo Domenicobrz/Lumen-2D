@@ -35,7 +35,7 @@ var Globals = {
 
     // Motion blur
     motionBlur: false,
-    motionBlurFramePhotons: 15000, 
+    motionBlurFramePhotons: 5000, 
 
     // Offscreen canvas -- activating an oc canvas slows down render times by about 1.7x
     deactivateOffscreenCanvas: true,
