@@ -58,6 +58,7 @@ function init() {
 
 function startWebworkers(sharedBuffer, sharedInfoBuffer) {
     let startWorkerMessage = {
+        randomNumber: Math.random(),
         messageType: "start",
         sharedBuffer: sharedBuffer,
         sharedInfoBuffer: sharedInfoBuffer,

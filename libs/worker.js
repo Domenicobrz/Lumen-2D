@@ -150,15 +150,13 @@ function renderSample() {
         sharedInfoArray[workerIndex] += 1;
 
 
-        // ********** Motion blur logic 
+        // Motion blur logic 
         motionBlurPhotonsCount += 1;
         if(Globals.motionBlur && (motionBlurPhotonsCount >= Globals.motionBlurFramePhotons)) {
             updateScene(Math.random());
             motionBlurPhotonsCount = 0;
         }
-        // ********** Motion blur logic - END
     }
-
 
     postMessage({
         messageType: "photons-fired-update",
@@ -182,7 +180,7 @@ function colorPhoton(ray, t, emitterColor, contribution, worldAttenuation) {
     // but the "real" sample_strenght should be 2.5  
     let continuousSteps = t / step;
 
-    // IMPORTANT:  we need to take less samples if the ray is short (proportionally) - otherwise we would increase radiance along short rays in an unproportional way
+    // we need to take less samples if the ray is short (proportionally) - otherwise we would increase radiance along short rays in an unproportional way
     // because we would add more emitterColor along those smaller rays 
     let SAMPLES = Math.max(  Math.floor(continuousSteps * SAMPLING_RATIO_PER_PIXEL_COVERED),  1  );
     let SAMPLES_STRENGHT = continuousSteps / SAMPLES; // e.g. if the line touches 30 pixels, but instead we're just 
@@ -328,7 +326,6 @@ function getColorFromEmitterSpectrum(spectrum) {
     return color;
 }
 
-
 function emitPhoton() {
 
     let emitter = scene.getEmitter();
@@ -344,7 +341,7 @@ function emitPhoton() {
         g: 1,
         b: 1,
     };                         
-    let worldAttenuation = Globals.worldAttenuation * (1.0 / Globals.WORLD_SIZE);
+    let worldAttenuation = Globals.worldAttenuation * (1 / Globals.WORLD_SIZE);
 
     
     for(let i = 0; i < LIGHT_BOUNCES; i++) {
@@ -366,5 +363,4 @@ function emitPhoton() {
             if(contribution.b < 0) contribution.b = 0;
         }
     }
-
 }

@@ -28,7 +28,6 @@ function createScene(scene, workerData, motionBlurT, ctx, frameNumber) {
 
 
     let seed = Math.floor(workerData.randomNumber * 1000000000);
-    console.log(seed);
     Utils.setSeed(seed);
     let rand = Utils.rand;
 

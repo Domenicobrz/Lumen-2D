@@ -8,22 +8,13 @@ function createScene(scene, workerData, motionBlurT, ctx, frameNumber) {
     createWorldBounds(scene);
 
     
-    scene.add(new Circle(0,0,3), new LambertMaterial({ opacity: 0.6, color: [1, 0.05, 0] }));
+    let circle = new Circle(0,0,3);
+    let material = new LambertMaterial({ opacity: 0.6, color: [1, 0.05, 0] });
+    scene.add(circle, material);
 
-
-    // you need to disable Globals.deactivateOffscreenCanvas to be able to 
-    // run this example! 
-
-
-    for(let i = 0; i < 5; i++) {
-        ctx.strokeStyle = "#444";
-        if(i % 2 === 1) ctx.strokeStyle = "#aaa";
-
-        ctx.lineWidth = (0.1 + i * 0.05);
-        ctx.beginPath();
-        ctx.arc(0, 0, 3.5 + i * 0.95, 0, Math.PI*2);
-        ctx.stroke();
-    }
+    let lightSource = new Edge(10, -5, 10, 5);
+    let lightMaterial = new LambertEmitterMaterial({ color: [500, 500, 500] });
+    scene.add(lightSource, lightMaterial);
 }
 
 function createWorldBounds(scene) {
@@ -38,7 +29,7 @@ function createWorldBounds(scene) {
     let bedge  = new Edge(-lbound, -bbound,  rbound, -bbound,    0, 0, 1);
 
     scene.add(ledge, edgeMaterial);
-    scene.add(redge, new LambertEmitterMaterial({ color: [500, 500, 500] }));
+    scene.add(redge, edgeMaterial); 
     scene.add(tedge, edgeMaterial);
     scene.add(bedge, edgeMaterial);
 }
