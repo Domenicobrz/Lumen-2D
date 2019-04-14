@@ -14,6 +14,8 @@ How to use
 3. Inside the script `./libs/createScene.js` you can code the scene you want to render
 4. Then simply open index.html with a local server
 
+------
+
 For an in-depth explanation on how to use Lumen-2D consult the wiki
 
 Credits
