@@ -21,3 +21,5 @@ For an in-depth explanation on how to use Lumen-2D consult the wiki
 Credits
 ------
 I can't thank [Benedikt Bitterli](https://benedikt-bitterli.me/) enough for his post [The Secret Life of Photons](https://benedikt-bitterli.me/tantalum/), where he presented the derivation and usage of few BRDFs which I used in this project
+
+[Zhang Yuning / codeworm96](https://github.com/codeworm96) for his awesome renderer [light2d-rs](https://github.com/codeworm96/light2d-rs) and his inspiring work with simulating Beer-Lambert absorption in dielectric materials
