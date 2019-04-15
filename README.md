@@ -24,8 +24,8 @@ I can't thank [Benedikt Bitterli](https://benedikt-bitterli.me/) enough for his 
 
 [Zhang Yuning / codeworm96](https://github.com/codeworm96) for his awesome renderer [light2d-rs](https://github.com/codeworm96/light2d-rs) and his inspiring work with simulating Beer-Lambert absorption in dielectric materials
 
-[Nicholas Sherlock](https://github.com/thenickdude) [webm-writer-js](https://github.com/thenickdude/webm-writer-js)
+[Nicholas Sherlock](https://github.com/thenickdude) - [webm-writer-js](https://github.com/thenickdude/webm-writer-js)
 
-[Thom Chiovoloni](https://github.com/thomcc) [quick-noise.js](https://github.com/thomcc/quick-noise.js)
+[Thom Chiovoloni](https://github.com/thomcc) - [quick-noise.js](https://github.com/thomcc/quick-noise.js)
 
-[dandavis](https://github.com/rndme) [download.js](https://github.com/rndme/download)
+[dandavis](https://github.com/rndme) - [download.js](https://github.com/rndme/download)
