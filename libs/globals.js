@@ -14,7 +14,7 @@ var Globals = {
     
     // Environment
     WORLD_SIZE: 20, 
-    worldAttenuation: 0.2, 
+    worldAttenuation: 0.7, 
     
     // Video export
     registerVideo: false,

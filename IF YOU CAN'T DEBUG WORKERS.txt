@@ -1,2 +1,0 @@
-for some reason Chrome simply wont diplay the source of web workers and wont let you debug them from the developer tools if they fail to load a module 
-so *make sure every module exists while you import it!* otherwise they may silently fail without explanation and they will drive you nuts for hours
