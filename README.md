@@ -16,7 +16,7 @@ How to use
 
 ------
 
-For an in-depth explanation on how to use Lumen-2D consult the wiki
+For an in-depth explanation on how to use Lumen-2D [consult the wiki](https://github.com/Domenicobrz/Lumen-2D/wiki)
 
 Credits
 ------
