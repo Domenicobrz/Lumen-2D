@@ -11,9 +11,7 @@
 # misc
 /renders
 /misc
-/inspiration
-/old files
-/libs - backup
+/insp
 
 .DS_Store
 .env.local
