@@ -1,6 +1,7 @@
 import { Scene } from "./scene.js";
 import { glMatrix, vec2 } from "./dependencies/gl-matrix-es6.js";
 import { createScene } from "./createScene.js";
+import { DielectricMaterial } from "./material/dielectric.js";
 
 
 var canvasSize;
@@ -173,6 +174,7 @@ function colorPhoton(ray, t, emitterColor, contribution, worldAttenuation) {
     let worldPoint = vec2.create();
     let previousPixel = [-1, -1];
 
+    let volumeAbsorption = contribution.var + contribution.vag + contribution.vab;
     
     // we can't use "steps" as a base value for a random sampling strategy, because we're sampling in a "continuous" domain
     // e.g.: if t / step ends up being 2.5, 'steps' will be set to 2, and assume we choose to compute only 1 sample, (since remember that RENDER_TYPE_NOISE 
@@ -235,6 +237,11 @@ function colorPhoton(ray, t, emitterColor, contribution, worldAttenuation) {
                 ocb = Math.exp(ocb * Globals.offscreenCanvasCPow);
             }
 
+            if(volumeAbsorption > 0) {
+                ocr *= Math.exp(-tt * contribution.var);
+                ocg *= Math.exp(-tt * contribution.vag);
+                ocb *= Math.exp(-tt * contribution.vab);
+            }
 
             let prevR = sharedArray[index + 0];
             let prevG = sharedArray[index + 1];
@@ -246,6 +253,14 @@ function colorPhoton(ray, t, emitterColor, contribution, worldAttenuation) {
             sharedArray[index + 1] = prevG + emitterColor[1] * ss * contribution.g * ocg;
             sharedArray[index + 2] = prevB + emitterColor[2] * ss * contribution.b * ocb;
         }
+    }
+
+    // diminish the contribution of this light ray after it passed through the 
+    // medium
+    if(volumeAbsorption > 0) {
+        contribution.r *= Math.exp(-t * contribution.var);
+        contribution.g *= Math.exp(-t * contribution.vag);
+        contribution.b *= Math.exp(-t * contribution.vab);
     }
 
     coloredPixels += SAMPLES;
@@ -340,6 +355,9 @@ function emitPhoton() {
         r: 1,
         g: 1,
         b: 1,
+        var: 0, 
+        vag: 0, 
+        vab: 0, 
     };                         
     let worldAttenuation = Globals.worldAttenuation * (1 / Globals.WORLD_SIZE);
 

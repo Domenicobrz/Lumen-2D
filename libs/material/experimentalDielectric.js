@@ -1,8 +1,8 @@
 import { Material } from "./material.js";
-import { glMatrix, vec2, mat2 } from "./../dependencies/gl-matrix-es6.js";
+import { glMatrix, vec2, mat2 } from "../dependencies/gl-matrix-es6.js";
 import { Globals } from "../globals.js";
 
-class DielectricMaterial extends Material {
+class ExperimentalDielectricMaterial extends Material {
     constructor(options) {
         super(options);
 
@@ -14,6 +14,8 @@ class DielectricMaterial extends Material {
         this.dispersion    = options.dispersion !== undefined ? options.dispersion : 0;
         this.absorption    = options.absorption !== undefined ? options.absorption : 0.1;
         this.volumeAbsorption = options.volumeAbsorption !== undefined ? options.volumeAbsorption : 0;
+        this.reflectionStrenght = options.reflectionStrenght !== undefined ? options.reflectionStrenght : 1;
+        this.refractionStrenght = options.refractionStrenght !== undefined ? options.refractionStrenght : 1;
 
         this.hasVolumeAbsorption = (this.volumeAbsorption[0] + this.volumeAbsorption[1] + this.volumeAbsorption[2]) > 0;
     }
@@ -155,11 +157,19 @@ class DielectricMaterial extends Material {
             // reflection
             m[0] = 2 * wiDotM * m[0] - w_o[0];
             m[1] = 2 * wiDotM * m[1] - w_o[1];
+
+            contribution.r *= this.reflectionStrenght;
+            contribution.g *= this.reflectionStrenght;
+            contribution.b *= this.reflectionStrenght;
         } else {
             // refraction
             m[0] = (etaM * wiDotM - cosThetaT) * m[0] - etaM * w_o[0];            
             m[1] = (etaM * wiDotM - cosThetaT) * m[1] - etaM * w_o[1];      
             refracted = true;
+
+            contribution.r *= this.refractionStrenght;
+            contribution.g *= this.refractionStrenght;
+            contribution.b *= this.refractionStrenght;
         }
 
         vec2.transformMat2(m, m, mat);
@@ -240,4 +250,4 @@ class DielectricMaterial extends Material {
     }
 }
 
-export { DielectricMaterial }
+export { ExperimentalDielectricMaterial }
