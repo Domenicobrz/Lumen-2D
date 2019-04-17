@@ -21,6 +21,7 @@ var workers = [];
 var videoManager;
 
 function init() {
+
     canvas = document.getElementById('canvas');
 	canvas.width  = canvasSize.width;
 	canvas.height = canvasSize.height;

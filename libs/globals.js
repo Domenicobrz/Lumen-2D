@@ -10,7 +10,7 @@ var Globals = {
 
     // Threading 
     workersCount: 5,
-    PHOTONS_PER_UPDATE: 20000,
+    PHOTONS_PER_UPDATE: 50000,
     
     // Environment
     WORLD_SIZE: 20, 
@@ -28,13 +28,13 @@ var Globals = {
     motionBlurFramePhotons: 5000, 
 
     // Offscreen canvas
-    deactivateOffscreenCanvas: false, // setting it to false slows down render times by about 1.7x
+    deactivateOffscreenCanvas: true, // setting it to false slows down render times by about 1.7x
     offscreenCanvasCPow: 1.1,
 
     // Canvas size
     canvasSize: { 
-        width:  950,
-        height: 800,
+        width:  1800,
+        height: 900,
     },
 
     // Reinhard tonemapping

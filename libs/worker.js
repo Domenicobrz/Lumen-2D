@@ -1,8 +1,7 @@
 import { Scene } from "./scene.js";
 import { glMatrix, vec2 } from "./dependencies/gl-matrix-es6.js";
 import { createScene } from "./createScene.js";
-import { DielectricMaterial } from "./material/dielectric.js";
-
+import { CanvasBoundsIntersection } from "./geometry/CanvasBoundsIntersection.js";
 
 var canvasSize;
 var scene;
@@ -19,6 +18,11 @@ var WORLD_SIZE = {
     h: 0,
 };  
 var LIGHT_BOUNCES; 
+var canvasBoundsIntersector;
+var canvasIntersectorResult = {
+    tmin: Infinity,
+    tmax: Infinity,
+}
 
 var USE_STRATIFIED_SAMPLING;
 var SAMPLING_RATIO_PER_PIXEL_COVERED;
@@ -55,6 +59,8 @@ onmessage = e => {
         LIGHT_BOUNCES = Globals.LIGHT_BOUNCES; 
         USE_STRATIFIED_SAMPLING = Globals.USE_STRATIFIED_SAMPLING;
         SAMPLING_RATIO_PER_PIXEL_COVERED = Globals.samplingRatioPerPixelCovered;
+
+        canvasBoundsIntersector = new CanvasBoundsIntersection(WORLD_SIZE.w, WORLD_SIZE.h);
 
         workerDataReference = e.data;
         workerIndex = e.data.workerIndex;
@@ -175,12 +181,30 @@ function colorPhoton(ray, t, emitterColor, contribution, worldAttenuation) {
     let previousPixel = [-1, -1];
 
     let volumeAbsorption = contribution.var + contribution.vag + contribution.vab;
+
+
+
+
+    canvasIntersectorResult.tmin = Infinity;
+    canvasIntersectorResult.tmax = Infinity;
+    let rayIntersectsVisibleCanvas = canvasBoundsIntersector.intersect(ray, canvasIntersectorResult);
+    let tstart = Infinity;
+    let tend   = Infinity;
+    if(rayIntersectsVisibleCanvas) {
+        if(canvasIntersectorResult.tmin < 0) tstart = 0;    // tstart coincide with the origin of the ray
+        else                                 tstart = canvasIntersectorResult.tmin;
+
+        // canvasIntersectorResult.tmax represents the intersection with the visible canvas bounds, 
+        // which can be greater than the actual end of this ray (e.g. if the ray hits an object inside the visible scene)
+        tend = Math.min(canvasIntersectorResult.tmax, t);
+    } 
+    
     
     // we can't use "steps" as a base value for a random sampling strategy, because we're sampling in a "continuous" domain
     // e.g.: if t / step ends up being 2.5, 'steps' will be set to 2, and assume we choose to compute only 1 sample, (since remember that RENDER_TYPE_NOISE 
     // only chooses to compute a subset of the total amount of pixels touched by a light ray) then SAMPLES_STRENGHT would hold (steps / SAMPLES) == 2, 
     // but the "real" sample_strenght should be 2.5  
-    let continuousSteps = t / step;
+    let continuousSteps = (tend - tstart) / step;
 
     // we need to take less samples if the ray is short (proportionally) - otherwise we would increase radiance along short rays in an unproportional way
     // because we would add more emitterColor along those smaller rays 
@@ -188,15 +212,19 @@ function colorPhoton(ray, t, emitterColor, contribution, worldAttenuation) {
     let SAMPLES_STRENGHT = continuousSteps / SAMPLES; // e.g. if the line touches 30 pixels, but instead we're just 
                                                       // coloring two, then these two pixels need 15x times the amount of radiance
 
-    let sample_step = t / SAMPLES;
+    // if this ray doesn't intersects the visible canvas, don't compute any sample and skip this for loop entirely
+    // note that we might still want to compute volume absorption so we can't simply 'return;' here 
+    if (!rayIntersectsVisibleCanvas) SAMPLES = 0;
+
+    let sample_step = (tend - tstart) / SAMPLES;
     for(let i = 0; i < SAMPLES; i++) {
 
-        let tt;
+        let tt = tstart;
         if(USE_STRATIFIED_SAMPLING) {
-            tt = sample_step * i;
+            tt += sample_step * i;
             tt += sample_step * Math.random();    
         } else {
-            tt = t * Math.random();
+            tt += (tend - tstart) * Math.random();
         }
 
         vec2.scaleAndAdd(worldPoint, ray.o, ray.d, tt);
