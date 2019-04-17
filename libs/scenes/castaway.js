@@ -23,7 +23,7 @@ import { ExperimentalDielectricMaterial } from "./material/experimentalDielectri
 
         // Environment
         WORLD_SIZE: 20, 
-        worldAttenuation: 0.7, 
+        worldAttenuation: 0.025, 
 
         // Video export
         registerVideo: false,

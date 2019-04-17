@@ -10,7 +10,7 @@ import { LambertEmitterMaterial } from "./material/lambertEmitter.js";
  * Assing these values to the Globals object
  * 
  *      WORLD_SIZE = 20;
- *      worldAttenuation = 1.0;
+ *      worldAttenuation = 0.05;
  *      LIGHT_BOUNCES: 10,
  *
  */

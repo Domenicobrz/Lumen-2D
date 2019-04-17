@@ -198,7 +198,7 @@ function colorPhoton(ray, t, emitterColor, contribution, worldAttenuation) {
         // which can be greater than the actual end of this ray (e.g. if the ray hits an object inside the visible scene)
         tend = Math.min(canvasIntersectorResult.tmax, t);
     } 
-    
+
     
     // we can't use "steps" as a base value for a random sampling strategy, because we're sampling in a "continuous" domain
     // e.g.: if t / step ends up being 2.5, 'steps' will be set to 2, and assume we choose to compute only 1 sample, (since remember that RENDER_TYPE_NOISE 
@@ -387,7 +387,7 @@ function emitPhoton() {
         vag: 0, 
         vab: 0, 
     };                         
-    let worldAttenuation = Globals.worldAttenuation * (1 / Globals.WORLD_SIZE);
+    let worldAttenuation = Globals.worldAttenuation;
 
     
     for(let i = 0; i < LIGHT_BOUNCES; i++) {
