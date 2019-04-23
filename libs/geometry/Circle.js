@@ -6,14 +6,29 @@ class Circle extends Geometry {
     constructor(x, y, radius, blur) {
         super();
 
+        // if no arguments are passed
+        if(x === undefined) {
+            x  = 0;
+            y  = 0;
+            radius = 1;
+        }
+
         this.center = vec2.fromValues(x, y);
         this.radius = radius;
+        this.blur = blur || 0;
+
+        this.computeAABB();
+    }
+
+    computeAABB() {
+        let x = this.center[0];
+        let y = this.center[1];
+        let radius = this.radius;
 
         this.aabb = new AABB();
         this.aabb.addVertex(vec2.fromValues(x - radius, y - radius));
         this.aabb.addVertex(vec2.fromValues(x + radius, y + radius));
 
-        this.blur = blur || 0;
         if(this.blur > 0) {
             let minx = x - radius - this.blur;
             let miny = y - radius - this.blur;
@@ -89,7 +104,6 @@ class Circle extends Geometry {
         return result;
     }
 
-
     // used to sample a point if this object is an emitter
     getRandomPoint() {
         let randomAngle = Math.random() * Math.PI * 2;
@@ -106,6 +120,26 @@ class Circle extends Geometry {
             p: randomPoint,
             normal: normal
         }
+    }
+
+    rotate(radians)  { 
+        /* not implemented */ 
+        return this;
+    }
+    translate(x, y) { 
+        this.center[0] += x;
+        this.center[1] += y;
+
+        this.computeAABB();
+
+        return this;
+    }
+    scale(amount)    {
+        this.radius *= amount;
+
+        this.computeAABB();
+
+        return this;
     }
 }
 

@@ -5,7 +5,7 @@ var Globals = {
     highPrecision: false, // if set to true, uses Float64Arrays which are 2x slower to work with
     USE_STRATIFIED_SAMPLING: true,
     samplingRatioPerPixelCovered: 0.14,
-    LIGHT_BOUNCES: 25,
+    LIGHT_BOUNCES: 35,
     skipBounce: 0,      
 
     // Threading 
@@ -34,7 +34,7 @@ var Globals = {
     // Canvas size
     canvasSize: { 
         width:  1800,
-        height: 900,
+        height: 1000,
     },
 
     // Reinhard tonemapping
