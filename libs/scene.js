@@ -1,5 +1,7 @@
 import { EmitterMaterial } from "./material/emitter.js";
 import { LambertMaterial } from "./material/lambert.js";
+import { Geometry } from "./geometry/Geometry.js";
+import { Primitive } from "./geometry/Primitive.js";
 import { glMatrix, vec2 } from "./dependencies/gl-matrix-es6.js";
 import { BVH } from "./bvh.js";
 
@@ -21,26 +23,47 @@ class Scene {
         this._bvh              = undefined;
     }
 
-    add(object, material) {
-        object.material = material || new LambertMaterial();
-        this._objects.push(object);
+    add(object, overrideMaterial) {
+        if(overrideMaterial !== undefined)
+            object.setMaterial(overrideMaterial);
 
-        if(object.material instanceof EmitterMaterial) {
-            let prevCdfValue = 0;
-            if(this._emittersCdfArray.length !== 0) 
-                prevCdfValue = this._emittersCdfArray[this._emittersCdfArray.length - 1].cdfValue;
 
-            let sampleValue;
-            if(object.material.samplePower) {
-                sampleValue = object.material.samplePower;
-            } else {
-                sampleValue = (object.material.color[0] + object.material.color[1] + object.material.color[2]) * object.material.sampleWeight;
-            }   
+        let primitivesArray = [];
+        if(object instanceof Geometry) {
+            primitivesArray = object.getPrimitives();
+        } else if (object instanceof Primitive) {
+            primitivesArray = [ object ];
+        }
 
-            let newCdfValue = prevCdfValue + sampleValue;
-            this._emittersCdfArray.push({ object: object, cdfValue: newCdfValue });
 
-            this._emittersCdfMax = newCdfValue;
+
+        for(let i = 0; i < primitivesArray.length; i++) {
+            let primitive = primitivesArray[i];
+            let material = primitive.getMaterial();
+            if(material === undefined) {
+                console.error("Lumen-2D error: Material not specified");
+                return;
+            }
+            
+            this._objects.push(primitive);
+
+            if(material instanceof EmitterMaterial) {
+                let prevCdfValue = 0;
+                if(this._emittersCdfArray.length !== 0) 
+                    prevCdfValue = this._emittersCdfArray[this._emittersCdfArray.length - 1].cdfValue;
+    
+                let sampleValue;
+                if(material.samplePower) {
+                    sampleValue = material.samplePower;
+                } else {
+                    sampleValue = (material.color[0] + material.color[1] + material.color[2]) * material.sampleWeight;
+                }   
+    
+                let newCdfValue = prevCdfValue + sampleValue;
+                this._emittersCdfArray.push({ object: primitive, cdfValue: newCdfValue });
+    
+                this._emittersCdfMax = newCdfValue;
+            }
         }
     }
 

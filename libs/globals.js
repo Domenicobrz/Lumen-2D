@@ -24,7 +24,7 @@ var Globals = {
     frameStart: 0,
 
     // Motion blur
-    motionBlur: false,
+    motionBlur: true,
     motionBlurFramePhotons: 5000, 
 
     // Offscreen canvas
@@ -33,7 +33,7 @@ var Globals = {
 
     // Canvas size
     canvasSize: { 
-        width:  1800,
+        width:  1300,
         height: 1000,
     },
 

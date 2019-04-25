@@ -1,8 +1,8 @@
-import { Geometry } from "./Geometry.js"
+import { Primitive } from "./Primitive.js"
 import { glMatrix, vec2, vec3 } from "./../dependencies/gl-matrix-es6.js";
 import { AABB } from "./AABB.js";
 
-class Edge extends Geometry {
+class Edge extends Primitive {
     constructor(x, y, dx, dy, blur, nx, ny) {
         super();
 
@@ -20,7 +20,6 @@ class Edge extends Geometry {
         this.blur = blur || 0;
         this.center = vec2.fromValues((this.v0[0] + this.v1[0]) / 2, 
                                       (this.v0[1] + this.v1[1]) / 2);
-
 
         this.computeAABB();
 
@@ -145,13 +144,12 @@ class Edge extends Geometry {
         this.center = vec2.fromValues((this.v0[0] + this.v1[0]) / 2, 
                                       (this.v0[1] + this.v1[1]) / 2);
 
-        // negative scaling will flip the normal
-        if(amount < 0) {
-            vec2.negate(this.normal, this.normal);
-        }
-
         this.computeAABB();
 
+        return this;
+    }
+    flipNormal() {
+        vec2.negate(this.normal, this.normal);
         return this;
     }
 }

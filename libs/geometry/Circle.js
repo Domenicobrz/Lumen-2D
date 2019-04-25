@@ -1,8 +1,8 @@
-import { Geometry } from "./Geometry.js"
-import { glMatrix, vec2 } from "./../dependencies/gl-matrix-es6.js";
+import { Primitive } from "./Primitive.js"
+import { glMatrix, vec2, vec3 } from "./../dependencies/gl-matrix-es6.js";
 import { AABB } from "./AABB.js";
 
-class Circle extends Geometry {
+class Circle extends Primitive {
     constructor(x, y, radius, blur) {
         super();
 
@@ -16,6 +16,8 @@ class Circle extends Geometry {
         this.center = vec2.fromValues(x, y);
         this.radius = radius;
         this.blur = blur || 0;
+
+        this.invNormal = false;
 
         this.computeAABB();
     }
@@ -95,6 +97,9 @@ class Circle extends Geometry {
         vec2.sub(normal, S1, center);
         vec2.normalize(normal, normal);
 
+        if(this.invNormal) {
+            vec2.negate(normal, normal);
+        }
 
         let result = {
             t: t,
@@ -115,6 +120,10 @@ class Circle extends Geometry {
         let normal = vec2.create();
         vec2.subtract(normal, randomPoint, this.center);
         vec2.normalize(normal, normal);
+
+        if(this.invNormal) {
+            vec2.negate(normal, normal);
+        }
 
         return {
             p: randomPoint,
@@ -139,6 +148,10 @@ class Circle extends Geometry {
 
         this.computeAABB();
 
+        return this;
+    }
+    flipNormal() {
+        this.invNormal = !this.invNormal;
         return this;
     }
 }
