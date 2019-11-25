@@ -35,7 +35,9 @@ Utils.setSeed = function(string) {
     Utils.rand = sfc32(seed(), seed(), seed(), seed());
 }
 
-
+Utils.smoothstep = function(t) {
+    return t * t * (3.0 - 2.0 * t);
+}
 
 Utils.hslToRgb = function(h, s, l) {
     var r, g, b;
