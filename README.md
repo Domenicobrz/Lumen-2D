@@ -3,14 +3,15 @@
 <img src="https://user-images.githubusercontent.com/25647854/55956659-bf734b80-5c64-11e9-9e8c-92e5ebd43d41.jpg" width="30%"></img> 
 <img src="https://user-images.githubusercontent.com/25647854/55956539-7e7b3700-5c64-11e9-81fb-96cf031d679b.jpg" width="30%"></img> 
 <img src="https://user-images.githubusercontent.com/25647854/56101788-d39a9f80-5f27-11e9-9e23-1e87637ad894.jpg" width="30%"></img> 
-<img src="https://user-images.githubusercontent.com/25647854/55277200-b8138000-52fd-11e9-9181-2efc6d4b3870.jpg" width="30%"></img> 
+<img src="https://user-images.githubusercontent.com/25647854/55277200-b8138000-52fd-11e9-9181-2efc6d4b3870.jpg" width="30%"></img>
+<img src="https://user-images.githubusercontent.com/25647854/69837821-fed0c580-1250-11ea-9d24-b10a3cfaf5f7.gif" width="30%"></img>  
 <img src="https://user-images.githubusercontent.com/25647854/55277202-b8138000-52fd-11e9-92ef-1572bd32d696.jpg" width="30%"></img> 
 <img src="https://user-images.githubusercontent.com/25647854/56101792-deedcb00-5f27-11e9-8d5a-c54a59eccccb.jpg" width="30%"></img> 
-<img src="https://user-images.githubusercontent.com/25647854/55277204-b8ac1680-52fd-11e9-9ebd-a7b01ad17de7.jpg" width="30%"></img> 
 <img src="https://user-images.githubusercontent.com/25647854/55277201-b8138000-52fd-11e9-9b63-00f1b1b53fad.jpg" width="30%"></img> 
+<img src="https://user-images.githubusercontent.com/25647854/55277205-b8ac1680-52fd-11e9-8fe9-434ec8ddb154.jpg" width="30%"></img>
+<img src="https://user-images.githubusercontent.com/25647854/55277204-b8ac1680-52fd-11e9-9ebd-a7b01ad17de7.jpg" width="30%"></img>
 <img src="https://user-images.githubusercontent.com/25647854/69838296-448e8d80-1253-11ea-889a-c2fc4e935c3f.jpg" width="30%"></img> 
 <img src="https://user-images.githubusercontent.com/25647854/69838297-47897e00-1253-11ea-9501-836ba0d84f85.jpg" width="30%"></img> 
-<img src="https://user-images.githubusercontent.com/25647854/69837821-fed0c580-1250-11ea-9d24-b10a3cfaf5f7.gif" width="30%"></img> 
 
 How to use
 ======
